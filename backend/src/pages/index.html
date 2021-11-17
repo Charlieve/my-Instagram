@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="https://glitch.com/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>This is My Instagram Backend!</title>
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />   
+  </head>
+  <body>
+    
+    <!-- this is the start of content -->
+    <h1>
+      This is My Instagram Backend!
+    </h1>
+    <p>
+      This starter gives you everything you need to start working on a new
+      project using Node. If you're looking for something a little more 
+      opinionated, try remixing
+      <a href="https://glitch.com/edit/#!/remix/glitch-hello-node"
+        >~glitch-hello-node</a
+      >.
+    </p>
+    <h2>
+      Register New User
+    </h2>
+    <form action='/register', method='post' enctype="multipart/form-data")>
+        <div>
+          <label>UserId</label>
+          <input type='text' id='userid' name='userid'/>
+      </div>
+      <div>
+          <label>Password</label>
+          <input type='password' id='password' name='password' value='defaultpassword'/>
+      </div>
+      <div>
+          <label>UserImage</label>
+          <input type="file"
+       id="userImage" name="userImage"
+       accept="image/png, image/jpg, image/jpeg">
+      </div>
+      <div>
+          <input type='submit' value='Register' />
+      </div>
+    </form>
+    <h2>
+      Register BOTs
+    </h2>
+    <form action='/registerbots', method='post')>
+      <div>
+          <label>Qty</label>
+          <input type='number' id='qty' name='qty' />
+      </div>
+      <div>
+          <input type='submit' value='Register' />
+      </div>
+    </form>
+    <h2>
+      New Post
+    </h2>
+    <form action='/newpost', method='post' enctype="multipart/form-data")>
+      <div>
+          <label>UserId</label>
+          <input type='text' id='userid' name='userid' />
+      </div>
+      <div>
+          <label>ContentImage</label>
+          <input type="file"
+       id="content" name="content"
+       accept="image/png, image/jpg, image/jpeg">
+      </div>
+      <div>
+          <label>Topic</label>
+          <textarea  type='text' id='topic' name='topic' rows="4" cols="50">
+        </textarea>
+      </div>
+      <div>
+          <label>Location</label>
+          <input type='text' id='location' name='location' />
+      </div>
+      <div>
+          <input type='submit' value='Add' />
+      </div>
+    </form>
+    
+    <h2>
+      Add New Posts by BOT
+    </h2>
+    <form action='/addnewposts', method='post')>
+      <div>
+          <label>Qty</label>
+          <input type='number' id='qty' name='qty' />
+      </div>
+      <div>
+          <input type='submit' value='Add' />
+      </div>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,44 @@
+db --
+    |-users
+    |   |-userId
+    |   |-userType
+    |   |-userName
+    |   |-password
+    |   |-createdDate
+    |   |-lastLoginDate
+    |   |-bio
+    |   |-userImage
+    |   |-posts
+    |       |-qty
+    |       |-postsId
+    |   |-followers
+    |       |-qty
+    |       |-followersByUserId
+    |   |-followings
+    |       |-qty
+    |       |-followingsByUserId
+    |
+    |
+    |-posts
+    |   |-postId
+    |   |-postByUserId
+    |   |-date
+    |   |-location
+    |   |-content
+    |   |-contentFirstType
+    |   |-contentQty
+    |   |-topic
+    |   |-commentQty
+    |   |-comments
+    |   |       |-index (0,1,2,3...)
+    |   |       |-replyToIndex (ex:-1=>topic)
+    |   |       |-userId
+    |   |       |-content
+    |   |       |-date
+    |   |       |-likeQty
+    |   |       |-likesByUserId
+    |   |-likeQty
+    |   |-likesByUserId
+
+
+    &fit=crop&w=80&h=80&dpr=2

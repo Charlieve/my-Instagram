@@ -1,0 +1,71 @@
+{
+    "feedRow01":[
+        {
+            "feedId": "feedId01",
+            "userId": "user01",
+            "feedContent": "https://source.unsplash.com/800x800?a",
+            "firstFeedType": "video",
+            "feedQty": 1
+        },
+        {
+            "feedId": "feedId02",
+            "userId": "user02",
+            "feedContent": "https://source.unsplash.com/800x800?b",
+            "firstFeedType": "image",
+            "feedQty": 1
+        },
+        {
+            "feedId": "feedId03",
+            "userId": "user03",
+            "feedContent": "https://source.unsplash.com/800x800?c",
+            "firstFeedType": "image",
+            "feedQty": 1
+        }
+    ],
+    "feedRow02":[
+        {
+            "feedId": "feedId04",
+            "userId": "user04",
+            "feedContent": "https://source.unsplash.com/800x800?d",
+            "firstFeedType": "image",
+            "feedQty": 1
+        },
+        {
+            "feedId": "feedId05",
+            "userId": "user05",
+            "feedContent": "https://source.unsplash.com/800x800?e",
+            "firstFeedType": "image",
+            "feedQty": 3
+        },
+        {
+            "feedId": "feedId06",
+            "userId": "user06",
+            "feedContent": "https://source.unsplash.com/800x800?f",
+            "firstFeedType": "image",
+            "feedQty": 1
+        }
+    ],
+    "feedRow03":[
+        {
+            "feedId": "feedId07",
+            "userId": "user07",
+            "feedContent": "https://source.unsplash.com/800x800?g",
+            "firstFeedType": "image",
+            "feedQty": 2
+        },
+        {
+            "feedId": "feedId08",
+            "userId": "user08",
+            "feedContent": "https://source.unsplash.com/800x800?h",
+            "firstFeedType": "image",
+            "feedQty": 1
+        },
+        {
+            "feedId": "feedId09",
+            "userId": "user09",
+            "feedContent": "https://source.unsplash.com/800x800?i",
+            "firstFeedType": "image",
+            "feedQty": 1
+        }
+    ]
+}
