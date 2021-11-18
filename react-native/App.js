@@ -9,7 +9,7 @@ import {
   NavigationContainer,
   useTheme,
 } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {  createStackNavigator  } from '@react-navigation/stack'
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -17,7 +17,7 @@ import axios from "axios";
 import { fetchUser, selectUserInfoStatus } from "./features/user/userSlice"; //GetUserInfo
 
 import ChatStackScreen from "./components/Chat";
-import CommentsStackScreen from "./components/Comments";
+import CommentsProvider from "./components/CommentsProvider";
 import FeedActionStackScreen from "./components/FeedAction";
 
 import HomeFeedStackScreen from "./components/HomeFeed";
@@ -47,11 +47,11 @@ const ThemeDark = {
   colors: {
     ...DarkTheme.colors,
     primary: "#0095f6",
-    card: "black",
+    subButton: '#333',
     text: "white",
     subText: 'gray',
     like: 'rgb(237, 73, 86)',
-    warnning: '#f44'
+    warning: '#f44'
   },
 };
 
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
 });
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 function HomeTabs({ navigation }) {
   const { colors } = useTheme();
@@ -158,7 +158,7 @@ export default function App() {
           />
           <Stack.Screen
             name="Comments"
-            component={CommentsStackScreen}
+            component={CommentsProvider}
             options={({ navigation }) => ({
               headerShown: true,
               headerStyle: { height: 44 },
@@ -175,13 +175,11 @@ export default function App() {
           <Stack.Screen
             name="FeedAction"
             component={FeedActionStackScreen}
-            style={{ height: 250 }}
             options={({ navigation }) => ({
-              headerShown: false,
               headerTransparent: false,
-              headerStyle: { marginTop: 100 },
-              presentation: "formSheet",
-              contentStyle: { marginTop: 300, borderRadius: 12 },
+              cardOverlayEnabled: true,
+              cardStyle: {backgroundColor: 'transparent'},
+              presentation: "transparentModal",
               headerLeft: ({ color }) => (
                 <Icon
                   onPress={() => navigation.goBack()}

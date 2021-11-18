@@ -8,7 +8,7 @@ const initialState = {
 
 export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
   const response = await axios.get(
-    "http://192.168.3.20:3000/api/user/BOT.carnor_jax_luke_skywalker"
+    "http://192.168.3.20:3000/api/user/BOT.exar_kun_captain_rex"
   ).then(response => response.data)
   .catch((error) => {console.error(error)})
   return response;

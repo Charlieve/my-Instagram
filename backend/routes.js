@@ -352,8 +352,44 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     try {
       const dbPostsQty = await getPostsQty();
       const randomIndex = Math.floor(Math.random() * dbPostsQty);
-      const post = await getPostByIndex(randomIndex);
+      const post = await getPostByIndex(randomIndex, {
+        _id: 0,
+        postId: 1,
+        postByUserId: 1,
+        date: 1,
+        location: 1,
+        content: 1,
+        topic: 1,
+        commentQty: 1,
+        likeQty: 1,
+      });
       res.send(post.postId);
+    } catch (err) {
+      res.status(400);
+      res.send(err);
+    }
+  });
+
+  //GET EXPLORE FEED
+
+  app.route("/api/explore").get(async (req, res) => {
+    try {
+      const dbPostsQty = await getPostsQty();
+      let postArr = {};
+      for (let i = 0; i < 3; i++) {
+        postArr["feedRow0" + (i + 1)] = [];
+        for (let j = 0; j < 3; j++) {
+          const randomIndex = Math.floor(Math.random() * dbPostsQty);
+          const post = await getPostByIndex(randomIndex, {
+            _id: 0,
+            postId: 1,
+            postByUserId: 1,
+          });
+          post.firstFeedType=i+j===0?'video':'image';
+          postArr["feedRow0" + (i + 1)].push(post);
+        }
+      }
+      res.send(postArr);
     } catch (err) {
       res.status(400);
       res.send(err);
@@ -502,13 +538,15 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       const postId = req.params.postid;
       const commentIndex = req.body.commentIndex;
       await findUserExists(userId);
-      const isLikesByUser = !!((await DBPosts.aggregate([
-        { $match: { postId: postId } },
-        { $project: { _id: 0, comments: 1 } },
-        { $unwind: "$comments" },
-        { $match: { "comments.index": commentIndex } },
-        { $unwind: "$comments.likesByUserId" },
-      ]).toArray()).length);
+      const isLikesByUser = !!(
+        await DBPosts.aggregate([
+          { $match: { postId: postId } },
+          { $project: { _id: 0, comments: 1 } },
+          { $unwind: "$comments" },
+          { $match: { "comments.index": commentIndex } },
+          { $unwind: "$comments.likesByUserId" },
+        ]).toArray()
+      ).length;
       if (isLikesByUser) {
         await findPostAndUpdate(
           { postId, comments: { $elemMatch: { index: commentIndex } } },
@@ -564,20 +602,19 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       });
     });
 
-    
   const findUserNotExists = (userId) =>
-  new Promise((resolve, reject) => {
-    DBUsers.findOne({ userId }, { projection: { _id: 1 } }, (err, user) => {
-      if (err) {
-        reject(err);
-      }
-      if (user) {
-        reject(userId + " is exists");
-      } else {
-        resolve(userId);
-      }
+    new Promise((resolve, reject) => {
+      DBUsers.findOne({ userId }, { projection: { _id: 1 } }, (err, user) => {
+        if (err) {
+          reject(err);
+        }
+        if (user) {
+          reject(userId + " is exists");
+        } else {
+          resolve(userId);
+        }
+      });
     });
-  });
 
   //PROMISE --- REGISTER
 
@@ -668,23 +705,13 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     });
 
   //PROMISE --- GET POST BY INDEX (FOR GETTING RANDOM FEED)
-  const getPostByIndex = (index) =>
+  const getPostByIndex = (index, projection) =>
     new Promise((resolve, reject) => {
       DBPosts.findOne(
         {},
         {
           skip: index,
-          projection: {
-            _id: 0,
-            postId: 1,
-            postByUserId: 1,
-            date: 1,
-            location: 1,
-            content: 1,
-            topic: 1,
-            commentQty: 1,
-            likeQty: 1,
-          },
+          projection,
         },
         (err, post) => {
           if (err) {

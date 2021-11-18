@@ -7,7 +7,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
 
-import { CommentContext } from "./Comments";
+import { CommentContext } from "./CommentsProvider";
 
 export default function CommentInput({ postId }) {
   const styles = createStyles();

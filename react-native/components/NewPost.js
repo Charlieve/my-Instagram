@@ -1,20 +1,45 @@
-import * as React from 'react';
-import { Button, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React from 'react';
+import { Image, Text, StyleSheet, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 
-const NewPostStack = createNativeStackNavigator();
-
+const uri = 'https://s3.amazonaws.com/exp-icon-assets/ExpoEmptyManifest_192.png';
 
 export default function NewPostStackScreen() {
+  const text = 'Hello, my container is blurring contents underneath!';
   return (
-      /*--------------------------------------------------------------------------
-    <HomeStack.Navigator>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
-      <HomeStack.Screen name="Details" component={DetailsScreen} />
-    </HomeStack.Navigator>
-    ---*/
-    <View><Text>hello world</Text></View>
+    <View style={styles.container}>
+      <Image style={[StyleSheet.absoluteFill, styles.image]} source={{ uri }} />
+      <BlurView intensity={100} style={styles.blurContainer}>
+        <Text style={styles.text}>{text}</Text>
+      </BlurView>
+      <BlurView intensity={80} tint="light" style={styles.blurContainer}>
+        <Text style={styles.text}>{text}</Text>
+      </BlurView>
+      <BlurView intensity={90} tint="dark" style={styles.blurContainer}>
+        <Text style={[styles.text, { color: '#fff' }]}>{text}</Text>
+      </BlurView>
+      <View><Text>asdfasdfasdf</Text></View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  blurContainer: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: '600'
+  },
+});
+

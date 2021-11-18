@@ -197,14 +197,44 @@ export default function createStyles() {
       justifyContent: "center",
       paddingLeft: 7,
     },
-    commentInputEmojisContainer:{
+    commentInputEmojisContainer: {
       justifyContent: "space-between",
       flexDirection: "row",
-      marginBottom: 15
+      marginBottom: 15,
     },
-    commentInputEmoji:{
+    commentInputEmoji: {
       fontSize: 24,
-    }
+    },
+
+    actionContainer: {
+      backgroundColor: colors.border,
+      alignItems: "center",
+      paddingTop: 20,
+      paddingBottom: 20,
+      paddingLeft: 10,
+      paddingRight: 10,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    },
+    actionButton: {
+      flex: 1,
+      backgroundColor: colors.subButton,
+      borderRadius: 10,
+      padding: 15,
+      alignItems: "center",
+      margin: 5,
+    },
+    actionList: {
+      flex: 1,
+      backgroundColor: colors.subButton,
+      alignItems: "center",
+      borderRadius: 10,
+    },
+    actionListButton: {
+      width: "100%",
+      padding: 15,
+      alignItems: "center",
+    },
   });
   const style = { colors, css };
   return style;

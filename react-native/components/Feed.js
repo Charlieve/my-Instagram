@@ -157,6 +157,7 @@ function FeedContent({
   highlightComment,
   setHighlightComment,
   postDate,
+  commentQty,
 }) {
   const styles = createStyles();
   return (
@@ -218,20 +219,32 @@ function FeedContent({
         <View>
           <View style={styles.css.marginBottom}>
             <Text style={styles.css.normalFont}>
-              <Text style={styles.css.boldFont}>{postAuthor}</Text>{" "}
+              <Text
+                style={styles.css.boldFont}
+                onPress={() =>
+                  navigation.push("OtherUserProfileScreen", {
+                    userId: postAuthor,
+                  })
+                }
+              >
+                {postAuthor}
+              </Text>{" "}
               {ContentProcessor(topic)}
             </Text>
           </View>
           <View>
             <View style={styles.css.marginBottom}>
-              <View>
-                <Text
-                  onPress={() => navigation.navigate("Comments", { postId })}
-                  style={styles.css.subFont}
-                >
-                  View all {feed.commentsCount} comments
-                </Text>
-              </View>
+              {commentQty > 0 && (
+                <View>
+                  <Text
+                    onPress={() => navigation.navigate("Comments", { postId })}
+                    style={styles.css.subFont}
+                  >
+                    View {commentQty > 1 && "all "}
+                    {commentQty} comment{commentQty > 1 && "s"}
+                  </Text>
+                </View>
+              )}
             </View>
             {highlightComment.map((comment, index) => {
               return (
@@ -380,9 +393,8 @@ export default function Feed({ navigation, postId }) {
   const [topic, setTopic] = useState();
   const [isLiked, setIsLiked] = useState();
   const [likeQty, setlikeQty] = useState();
-  const [highlightComment, setHighlightComment] = useState(
-    feed.highlightComment
-  );
+  const [commentQty, setCommentQty] = useState();
+  const [highlightComment, setHighlightComment] = useState([]); //TODO
   const [status, setStatus] = useState("idle");
   const dispatch = useDispatch();
   const afterLoadedAction = () => {
@@ -410,6 +422,7 @@ export default function Feed({ navigation, postId }) {
         setTopic(feed.topic);
         setlikeQty(feed.likeQty);
         setIsLiked(feed.isLiked);
+        setCommentQty(feed.commentQty);
         setTimeout(afterLoadedAction, 1000);
       })();
     }
@@ -445,6 +458,7 @@ export default function Feed({ navigation, postId }) {
           highlightComment={highlightComment}
           setHighlightComment={setHighlightComment}
           postDate={postDate}
+          commentQty={commentQty}
         />
       </View>
     );

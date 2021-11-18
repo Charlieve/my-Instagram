@@ -12,7 +12,6 @@ import DoubleTapComponent from "../functionComponents/DoubleTapComponent";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
-import DemoJSON from "../demo/feed/feed1Comment.json"; //delete
 import createStyles from "../styles/styles";
 import CommentInput from "./CommentInput";
 import ContentProcessor from "./ContentProcessor";
@@ -21,7 +20,8 @@ import TimeAgo from "./TimeAgo";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
 
-export const CommentContext = createContext({});
+import { CommentContext } from "./CommentsProvider";
+
 
 function AllCommentsComponent({ AllcommentsData, postId }) {
   return (
@@ -48,7 +48,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
           />
           <Icon
             name={"alert-circle"}
-            color={styles.colors.warnning}
+            color={styles.colors.warning}
             size={22}
           />
         </View>
@@ -79,8 +79,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
             });
           };
           return (
-            <View
-            key={comment.index}>
+            <View key={comment.index}>
               <View
                 opacity={
                   comment?.status === "pending" || comment?.status === "failed"
@@ -197,17 +196,22 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
   );
 }
 
-export default function CommentsStackScreen({ navigation, route }) {
+export default function CommentsStackScreen({ navigation, postId }) {
   const styles = createStyles();
-  const [postData, setPostData] = useState({ status: "idle" });
-  const { postId } = route.params;
+  const {
+    postData,
+    setPostData,
+    comments,
+    setComments,
+    replyTo,
+    setReplyTo,
+    inputContent,
+    onChangeText,
+  } = useContext(CommentContext);
   const userId = useSelector(selectUserId);
   const postAuthor = postData?.postByUserId;
   const postDate = postData?.date;
   const topic = postData?.topic;
-  const [comments, setComments] = useState([]);
-  const [replyTo, setReplyTo] = useState({ userId: "", index: -1 });
-  const [inputContent, onChangeText] = React.useState("");
   useEffect(() => {
     let isMount = true;
     (async () => {
@@ -236,7 +240,7 @@ export default function CommentsStackScreen({ navigation, route }) {
     return () => {
       isMount = false;
     };
-  }, [route]);
+  }, [postId]);
   if (postData.status === "idle") {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -245,16 +249,6 @@ export default function CommentsStackScreen({ navigation, route }) {
     );
   } else {
     return (
-      <CommentContext.Provider
-        value={{
-          replyTo,
-          setReplyTo,
-          comments,
-          setComments,
-          inputContent,
-          onChangeText,
-        }}
-      >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={64}
@@ -301,7 +295,6 @@ export default function CommentsStackScreen({ navigation, route }) {
             <CommentInput postId={postId} />
           </View>
         </KeyboardAvoidingView>
-      </CommentContext.Provider>
     );
   }
 }
