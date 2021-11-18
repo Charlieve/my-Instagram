@@ -207,14 +207,23 @@ export default function createStyles() {
     },
 
     actionContainer: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.popup,
       alignItems: "center",
       paddingTop: 20,
-      paddingBottom: 20,
+      paddingBottom: 200,
       paddingLeft: 10,
       paddingRight: 10,
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
+      marginBottom: -180,
+    },
+    actionTipsBar:{
+      width:40,
+      height:4,
+      borderRadius:20,
+      backgroundColor: 'rgba(128,128,128,0.3)',
+      marginBottom:15,
+      transform:[{translateY:-5}]
     },
     actionButton: {
       flex: 1,

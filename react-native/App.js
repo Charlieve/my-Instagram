@@ -2,14 +2,14 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import store from "./app/store";
 import { Provider, useSelector } from "react-redux";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme, Easing } from "react-native";
 import {
   DefaultTheme,
   DarkTheme,
   NavigationContainer,
   useTheme,
 } from "@react-navigation/native";
-import {  createStackNavigator  } from '@react-navigation/stack'
+import { createStackNavigator,TransitionPresets  } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -36,9 +36,11 @@ const Theme = {
     ...DefaultTheme.colors,
     primary: "#0095f6",
     background: "white",
-    subText: 'gray',
-    like: 'rgb(237, 73, 86)',
-    warnning: '#f44'
+    subText: "gray",
+    subButton: "#eee",
+    popup: "white",
+    like: "rgb(237, 73, 86)",
+    warning: "#f44",
   },
 };
 
@@ -47,11 +49,12 @@ const ThemeDark = {
   colors: {
     ...DarkTheme.colors,
     primary: "#0095f6",
-    subButton: '#333',
+    subButton: "#333",
+    popup: "#111",
     text: "white",
-    subText: 'gray',
-    like: 'rgb(237, 73, 86)',
-    warning: '#f44'
+    subText: "gray",
+    like: "rgb(237, 73, 86)",
+    warning: "#f44",
   },
 };
 
@@ -81,7 +84,11 @@ function HomeTabs({ navigation }) {
         component={HomeFeedStackScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
-            <Icon name={"home" + (focused?"":"-outline")} color={color} size={size*1.1} />
+            <Icon
+              name={"home" + (focused ? "" : "-outline")}
+              color={color}
+              size={size * 1.1}
+            />
           ),
         }}
       />
@@ -90,8 +97,12 @@ function HomeTabs({ navigation }) {
         component={ExplorerStackScreen}
         style={styles.asd}
         options={{
-          tabBarIcon: ({ focused,color, size }) => (
-            <Icon name={"search" + (focused?"":"-outline")} color={color} size={size*1.1} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              name={"search" + (focused ? "" : "-outline")}
+              color={color}
+              size={size * 1.1}
+            />
           ),
         }}
       />
@@ -99,8 +110,12 @@ function HomeTabs({ navigation }) {
         name="NewPost"
         component={NewPostStackScreen}
         options={{
-          tabBarIcon: ({focused, color, size }) => (
-            <Icon name={"add-circle" + (focused?"":"-outline")} color={color} size={size*1.1} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              name={"add-circle" + (focused ? "" : "-outline")}
+              color={color}
+              size={size * 1.1}
+            />
           ),
         }}
       />
@@ -108,8 +123,12 @@ function HomeTabs({ navigation }) {
         name="Activity"
         component={ActivityStackScreen}
         options={{
-          tabBarIcon: ({focused, color, size }) => (
-            <Icon name={"heart"+ (focused?"":"-outline")} color={color} size={size*1.1} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              name={"heart" + (focused ? "" : "-outline")}
+              color={color}
+              size={size * 1.1}
+            />
           ),
         }}
       />
@@ -117,8 +136,12 @@ function HomeTabs({ navigation }) {
         name="Profile"
         component={ProfileStackScreen}
         options={{
-          tabBarIcon: ({focused, color, size }) => (
-            <Icon name={"person-circle" + (focused?"":"-outline")} color={color} size={size*1.1} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              name={"person-circle" + (focused ? "" : "-outline")}
+              color={color}
+              size={size * 1.1}
+            />
           ),
         }}
       />
@@ -177,9 +200,18 @@ export default function App() {
             component={FeedActionStackScreen}
             options={({ navigation }) => ({
               headerTransparent: false,
-              cardOverlayEnabled: true,
-              cardStyle: {backgroundColor: 'transparent'},
+              cardStyle: { backgroundColor: "transparent" },
               presentation: "transparentModal",
+              transitionSpec: {
+                open: {
+                  animation: "timing",
+                  config: { duration: 200, easing: Easing.linear  },
+                },
+                close: {
+                  animation: "timing",
+                  config: { duration: 200, easing: Easing.cubic  },
+                },
+              },
               headerLeft: ({ color }) => (
                 <Icon
                   onPress={() => navigation.goBack()}

@@ -1,8 +1,16 @@
-import React from "react";
-import { Animated,View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import {
+  Animated,
+  Easing,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  PanResponder,
+} from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
-import { useCardAnimation } from '@react-navigation/stack';
+import { useCardAnimation } from "@react-navigation/stack";
 
 import createStyles from "../styles/styles";
 
@@ -11,7 +19,44 @@ import { selectUserId } from "../features/user/userSlice";
 
 export default function FeedActionStackScreen({ navigation }) {
   const styles = createStyles();
-  const { current } = useCardAnimation();
+  const bottomSheet = useRef(new Animated.ValueXY({ x: 0, y: 500 })).current;
+  const bottomSheetResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, { dy: bottomSheet.y }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.vy > 0.8) {
+          Animated.timing(bottomSheet, {
+            toValue: { x: 0, y: 500 },
+            duration: 1000,
+            useNativeDriver: true,
+            easing: Easing.out(Easing.exp),
+          }).start();
+          navigation.goBack();
+        } else {
+          Animated.timing(bottomSheet, {
+            toValue: { x: 0, y: 0 },
+            duration: 500,
+            useNativeDriver: true,
+            easing: Easing.out(Easing.exp),
+          }).start();
+        }
+      },
+    })
+  ).current;
+  useEffect(() => {
+    Animated.timing(bottomSheet, {
+      toValue: { x: 0, y: 0 },
+      duration: 300,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.exp),
+    }).start();
+    console.log(bottomSheet.y);
+  }),
+    [];
+  // const { current } = useCardAnimation();
   return (
     <View
       style={{
@@ -19,23 +64,48 @@ export default function FeedActionStackScreen({ navigation }) {
         flexDirection: "column-reverse",
       }}
     >
-      <Pressable
+      <Animated.View
         style={[
           StyleSheet.absoluteFill,
-          { backgroundColor: "rgba(0, 0, 0, 0.3)" },
+          {
+            backgroundColor: "black",
+            opacity: bottomSheet.y.interpolate({
+              inputRange: [-1, 0, 300,301],
+              outputRange: [0.7, 0.7, 0,0],
+            }),
+          },
         ]}
-        onPress={navigation.goBack}
-      />
-      <Animated.View style={[styles.css.actionContainer,{
-          transform: [
-            {
-              translateY: current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [300, 1],
-                extrapolate: 'clamp',
-              }),
-            },
-          ],}]}>
+      >
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={() => {
+            Animated.timing(bottomSheet, {
+              toValue: { x: 0, y: 500 },
+              duration: 1000,
+              useNativeDriver: true,
+              easing: Easing.out(Easing.exp),
+            }).start();
+            navigation.goBack();
+          }}
+        />
+      </Animated.View>
+      <Animated.View
+        style={[
+          styles.css.actionContainer,
+          {
+            transform: [
+              {
+                translateY: bottomSheet.y.interpolate({
+                  inputRange: [-10, 0, 5],
+                  outputRange: [-2, 0, 4],
+                }),
+              },
+            ],
+          },
+        ]}
+        {...bottomSheetResponder.panHandlers}
+      >
+        <View style={styles.css.actionTipsBar} />
         <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
           <Pressable style={styles.css.actionButton}>
             <Icon name="share-outline" color={styles.colors.text} size={26} />
@@ -72,14 +142,10 @@ export default function FeedActionStackScreen({ navigation }) {
         <View style={{ width: "100%", padding: 5, flexDirection: "row" }}>
           <View style={styles.css.actionList}>
             <Pressable style={styles.css.actionListButton}>
-              <Text style={styles.css.normalFont}>
-                User Profile
-              </Text>
+              <Text style={styles.css.normalFont}>User Profile</Text>
             </Pressable>
             <Pressable style={styles.css.actionListButton}>
-              <Text style={styles.css.normalFont}>
-                Follow
-              </Text>
+              <Text style={styles.css.normalFont}>Follow</Text>
             </Pressable>
           </View>
         </View>
