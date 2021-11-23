@@ -92,7 +92,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
                     <Image
                       style={styles.css.commentUserImage}
                       source={{
-                        uri: `http://192.168.3.20:3000/users/${comment.userId}/userimage`,
+                        uri: `http://192.168.3.20:3000/users/${comment.userId}/userimage.png`,
                       }}
                     />
                   </View>
@@ -262,7 +262,7 @@ export default function CommentsStackScreen({ navigation, postId }) {
                     <Image
                       style={styles.css.commentUserImage}
                       source={{
-                        uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage`,
+                        uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage.png`,
                       }}
                     />
                   </View>

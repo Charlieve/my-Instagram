@@ -12,27 +12,18 @@ import TimeAgo from "./TimeAgo";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
+import { useNavigation } from "@react-navigation/native";
 
-function FeedHeader({ navigation, postAuthor, location, postAuthorType }) {
+export function FeedHeader({
+  navigation,
+  postAuthor,
+  location,
+  postAuthorType,
+}) {
   const styles = createStyles();
   return (
-    <View
-      style={{
-        height: 60,
-        flexDirection: "row",
-        alignContent: "space-between",
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          height: "100%",
-          paddingTop: 14,
-          paddingBottom: 14,
-          paddingLeft: 16,
-          flexDirection: "row",
-        }}
-      >
+    <View style={styles.css.feedHeaderContainer}>
+      <View style={styles.css.feedHeaderAuthorContainer}>
         <TouchableOpacity
           onPress={() =>
             navigation.push("OtherUserProfileScreen", { userId: postAuthor })
@@ -41,19 +32,11 @@ function FeedHeader({ navigation, postAuthor, location, postAuthorType }) {
           <Image
             style={{ height: "100%", aspectRatio: 1, borderRadius: 50 }}
             source={{
-              uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage`,
+              uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage.png`,
             }}
           />
         </TouchableOpacity>
-        <View
-          style={{
-            height: "100%",
-            paddingLeft: 12,
-            flexDirection: "column",
-            alignContent: "space-between",
-            justifyContent: "center",
-          }}
-        >
+        <View style={styles.css.feedHeaderAuthor}>
           <TouchableOpacity
             style={{ flexDirection: "row" }}
             onPress={() =>
@@ -79,16 +62,7 @@ function FeedHeader({ navigation, postAuthor, location, postAuthorType }) {
           )}
         </View>
       </View>
-      <View
-        style={{
-          width: 48,
-          height: "100%",
-          paddingTop: 10,
-          paddingBottom: 10,
-          paddingRight: 8,
-          justifyContent: "center",
-        }}
-      >
+      <View style={styles.css.feedHeaderAction}>
         <Icon
           onPress={() => navigation.navigate("FeedAction")}
           name="ellipsis-horizontal"
@@ -101,15 +75,19 @@ function FeedHeader({ navigation, postAuthor, location, postAuthorType }) {
   );
 }
 
-function FeedImage({
+export function FeedImage({
   userId,
   postId,
   isLiked,
   setIsLiked,
   likeQty,
   setlikeQty,
+  imageData,
 }) {
   const styles = createStyles();
+  const imageSrc = imageData
+    ? "data:image/png;base64," + imageData
+    : `http://192.168.3.20:3000/post/${postId}/content.jpeg`;
   return (
     <View
       style={{
@@ -134,22 +112,18 @@ function FeedImage({
         }}
         style={{ flex: 1 }}
       >
-        <Image
-          style={{ flex: 1 }}
-          source={{ uri: `http://192.168.3.20:3000/post/${postId}/content` }}
-        />
+        <Image style={{ flex: 1 }} source={{ uri: imageSrc }} />
       </DoubleTapComponent>
     </View>
   );
 }
 
-function FeedContent({
+export function FeedContent({
   navigation,
   userId,
   postId,
   postAuthor,
   topic,
-  feed,
   isLiked,
   setIsLiked,
   likeQty,
@@ -212,7 +186,7 @@ function FeedContent({
             flexDirection: "row",
           }}
         >
-          {feed.likeQty !== 0 && (
+          {likeQty !== 0 && (
             <Text style={styles.css.boldFont}>{likeQty} likes</Text>
           )}
         </View>
@@ -229,7 +203,7 @@ function FeedContent({
               >
                 {postAuthor}
               </Text>{" "}
-              {ContentProcessor(topic)}
+              {topic && <ContentProcessor content={topic} />}
             </Text>
           </View>
           <View>
@@ -299,12 +273,9 @@ function FeedContent({
   );
 }
 
-function ContentProcessor(content) {
+function ContentProcessor({content}) {
   const styles = createStyles();
-  if (!content) {
-    content = "nothing";
-  }
-  let fullContent = content.match(/[^\s]+|\n/g);
+  let fullContent = content.match(/[^\s]+|\n/g)||[];
   const regex = new RegExp("^[#@].+");
   fullContent.forEach((string, index) => {
     if (regex.test(string)) {
@@ -344,7 +315,7 @@ function ContentProcessor(content) {
   }
   const shortContent = ShortContentProcessor(fullContent);
   const [rendContent, setRendContent] = useState(shortContent);
-  return rendContent;
+  return <Text>{rendContent}</Text>;
 }
 
 function LikeComponent({
@@ -381,7 +352,8 @@ function LikeComponent({
   );
 }
 
-export default function Feed({ navigation, postId }) {
+export default function Feed({ postId }) {
+  const navigation = useNavigation();
   const userId = useSelector(selectUserId);
   const styles = createStyles();
   let feed = DemoJSON;
@@ -390,10 +362,10 @@ export default function Feed({ navigation, postId }) {
   const [postDate, setPostDate] = useState();
   const [location, setLocation] = useState();
   const [content, setContent] = useState();
-  const [topic, setTopic] = useState();
+  const [topic, setTopic] = useState("");
   const [isLiked, setIsLiked] = useState();
-  const [likeQty, setlikeQty] = useState();
-  const [commentQty, setCommentQty] = useState();
+  const [likeQty, setlikeQty] = useState(0);
+  const [commentQty, setCommentQty] = useState(0);
   const [highlightComment, setHighlightComment] = useState([]); //TODO
   const [status, setStatus] = useState("idle");
   const dispatch = useDispatch();
@@ -423,13 +395,14 @@ export default function Feed({ navigation, postId }) {
         setlikeQty(feed.likeQty);
         setIsLiked(feed.isLiked);
         setCommentQty(feed.commentQty);
-        setTimeout(afterLoadedAction, 1000);
+        // setTimeout(afterLoadedAction, 1000);
+        afterLoadedAction();
       })();
     }
     return <LoadingSpinner />;
   } else {
     return (
-      <View style={styles.css.feed}>
+      <View style={styles.css.feedContainer}>
         <FeedHeader
           postAuthor={postAuthor}
           postAuthorType={postAuthorType}

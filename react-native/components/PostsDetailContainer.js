@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from "react";
-import { FlatList } from "react-native";
+import { VirtualizedList } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchFeed,
@@ -11,7 +11,7 @@ import {
 import Feed from "../components/Feed";
 
 
-export default function FeedsContainer({ navigation }) {
+export default function PostsDetailContainer({ navigation }) {
   const dispatch = useDispatch();
   const status = useSelector(selectFeedsStatus);
   const onEndReachedAction = () => {
@@ -36,18 +36,18 @@ export default function FeedsContainer({ navigation }) {
     status=== 'idle' && initalizeFeedAction()
   })
   return (
-    <FlatList
+    <VirtualizedList
       style={{ flex: 1, width: "100%" }}
       data={useSelector(selectFeeds)}
       renderItem={({ item }) => (
         <Feed feedData={item} postId={item} navigation={navigation} />
       )}
       keyExtractor={(item, index) => 'feed' + index}
-      initialNumToRender={0}
-      onEndReachedThreshold={1}
-      onEndReached={() => onEndReachedAction()}
-      onRefresh={()=>initalizeFeedAction()}
-      refreshing={false}
+      initialNumToRender={1}
+      // onEndReachedThreshold={1}
+      // onEndReached={() => onEndReachedAction()}
+      // onRefresh={()=>initalizeFeedAction()}
+      // refreshing={false}
     />
   );
 }

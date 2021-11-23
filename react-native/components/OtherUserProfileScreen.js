@@ -23,7 +23,7 @@ export default function OtherUserProfileScreen({ navigation, route }) {
         .reverse()
         .entries()) {
         userPostsArr[Math.floor(index / (3 * 1))] || userPostsArr.push([]);
-        userPostsArr[Math.floor(index / (3 * 1))].push(data);
+      userPostsArr[Math.floor(index / (3 * 1))].push({authorId:userId,postId:data});
       }
       while (userPostsArr[userPostsArr.length - 1].length % 3 !== 0) {
         userPostsArr[userPostsArr.length - 1].push("");
@@ -50,7 +50,7 @@ export default function OtherUserProfileScreen({ navigation, route }) {
             <Image
               style={styles.css.userImage}
               source={{
-                uri: "http://192.168.3.20:3000/users/" + userInfo.userId + "/userimage",
+                uri: "http://192.168.3.20:3000/users/" + userInfo.userId + "/userimage.png",
               }}
             />
             <View style={styles.css.userInformationQtys}>

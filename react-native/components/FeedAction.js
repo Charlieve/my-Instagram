@@ -106,7 +106,7 @@ export default function FeedActionStackScreen({ navigation }) {
         {...bottomSheetResponder.panHandlers}
       >
         <View style={styles.css.actionTipsBar} />
-        <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+        <View style={{width:"100%", flexDirection: "row", justifyContent: "space-around" }}>
           <Pressable style={styles.css.actionButton}>
             <Icon name="share-outline" color={styles.colors.text} size={26} />
             <Text

@@ -2,14 +2,17 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import store from "./app/store";
 import { Provider, useSelector } from "react-redux";
-import { StyleSheet, useColorScheme, Easing } from "react-native";
+import { StyleSheet, useColorScheme, Easing, View } from "react-native";
 import {
   DefaultTheme,
   DarkTheme,
   NavigationContainer,
   useTheme,
 } from "@react-navigation/native";
-import { createStackNavigator,TransitionPresets  } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -19,6 +22,7 @@ import { fetchUser, selectUserInfoStatus } from "./features/user/userSlice"; //G
 import ChatStackScreen from "./components/Chat";
 import CommentsProvider from "./components/CommentsProvider";
 import FeedActionStackScreen from "./components/FeedAction";
+import AnimationFeedScreen from "./components/AnimationFeed";
 
 import HomeFeedStackScreen from "./components/HomeFeed";
 import ExplorerStackScreen from "./components/Explorer";
@@ -49,6 +53,8 @@ const ThemeDark = {
   colors: {
     ...DarkTheme.colors,
     primary: "#0095f6",
+    background: 'black',
+    card:'black',
     subButton: "#333",
     popup: "#111",
     text: "white",
@@ -158,72 +164,111 @@ export default function App() {
   }
   //store.dispatch(fetchUser())
   return (
-    <Provider store={store}>
-      <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen key="Asad" name="App" component={HomeTabs} />
-          <Stack.Screen
-            name="Chat"
-            component={ChatStackScreen}
-            options={({ navigation }) => ({
-              headerShown: true,
-              headerTitle: "",
-              headerStyle: { height: 44 },
-              headerLeft: ({ color }) => (
-                <Icon
-                  onPress={() => navigation.goBack()}
-                  name="chevron-back"
-                  color={color}
-                  size={40}
-                />
-              ),
-            })}
-          />
-          <Stack.Screen
-            name="Comments"
-            component={CommentsProvider}
-            options={({ navigation }) => ({
-              headerShown: true,
-              headerStyle: { height: 44 },
-              headerLeft: ({ color }) => (
-                <Icon
-                  onPress={() => navigation.goBack()}
-                  name="chevron-back"
-                  color={color}
-                  size={40}
-                />
-              ),
-            })}
-          />
-          <Stack.Screen
-            name="FeedAction"
-            component={FeedActionStackScreen}
-            options={({ navigation }) => ({
-              headerTransparent: false,
-              cardStyle: { backgroundColor: "transparent" },
-              presentation: "transparentModal",
-              transitionSpec: {
-                open: {
-                  animation: "timing",
-                  config: { duration: 200, easing: Easing.linear  },
-                },
-                close: {
-                  animation: "timing",
-                  config: { duration: 200, easing: Easing.cubic  },
-                },
-              },
-              headerLeft: ({ color }) => (
-                <Icon
-                  onPress={() => navigation.goBack()}
-                  name="chevron-back"
-                  color={color}
-                  size={40}
-                />
-              ),
-            })}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        backgroundColor: scheme==='dark'?ThemeDark.colors.border:Theme.colors.border,
+      }}
+    >
+      <View style={{ flex: 1, maxWidth: 800 }}>
+        <Provider store={store}>
+          <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen key="Asad" name="App" component={HomeTabs} />
+              <Stack.Screen
+                name="Chat"
+                component={ChatStackScreen}
+                options={({ navigation }) => ({
+                  headerShown: true,
+                  headerTitle: "",
+                  headerStyle: { height: 44 },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="Comments"
+                component={CommentsProvider}
+                options={({ navigation }) => ({
+                  headerShown: true,
+                  headerStyle: { height: 44 },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="FeedAction"
+                component={FeedActionStackScreen}
+                options={({ navigation }) => ({
+                  headerTransparent: false,
+                  cardStyle: { backgroundColor: "transparent" },
+                  presentation: "transparentModal",
+                  transitionSpec: {
+                    open: {
+                      animation: "timing",
+                      config: { duration: 200, easing: Easing.linear },
+                    },
+                    close: {
+                      animation: "timing",
+                      config: { duration: 200, easing: Easing.cubic },
+                    },
+                  },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="AnimationFeed"
+                component={AnimationFeedScreen}
+                options={({ navigation }) => ({
+                  headerTransparent: false,
+                  cardStyle: { backgroundColor: "transparent" },
+                  presentation: "transparentModal",
+                  gestureEnabled: false,
+                  transitionSpec: {
+                    open: {
+                      animation: "timing",
+                      config: { duration: 0, easing: Easing.linear },
+                    },
+                    close: {
+                      animation: "timing",
+                      config: { duration: 100, easing: Easing.exp },
+                    },
+                  },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </Provider>
+      </View>
+    </View>
   );
 }

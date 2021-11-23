@@ -8,16 +8,18 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  Pressable,
+  Easing,
 } from "react-native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import FeedsDetailContainer from "./FeedsDetailContainer";
 import Icon from "react-native-vector-icons/Ionicons";
 import DemoJSON from "../demo/explorer/explorer01.json";
 import axios from "axios";
 import { BlurView } from "expo-blur";
+import PostThumbnail from "./PostThumbnail"
+import PostsDetailScreen from "./PostsDetailScreen"
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const styles = StyleSheet.create({
   feeds: {
@@ -27,21 +29,17 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     flexWrap: "wrap",
-    height: Dimensions.get("window").width / 3,
     alignContent: "space-between",
-    marginBottom: 1,
+    marginBottom: 0.5
   },
   feedRowBig: {
     width: "100%",
     flexDirection: "column",
     flexWrap: "wrap",
-    height: (Dimensions.get("window").width / 3) * 2,
     alignContent: "space-between",
     marginBottom: 1,
   },
   feedComponent: {
-    width: Dimensions.get("window").width / 3 - 1,
-    height: Dimensions.get("window").width / 3 - 1,
     aspectRatio: 1,
     marginBottom: 1,
     backgroundColor: "black",
@@ -65,50 +63,36 @@ function Feeds({ feedsData, navigation }) {
 }
 
 function FeedRow({ feedsRowData, navigation }) {
+  const [componentWidth,setComponentWidth] = useState(Math.min(800,Dimensions.get('window').width))
   return (
     <View
-      style={
+      style={[styles.feedRow,
         feedsRowData[0].firstFeedType === "image"
-          ? styles.feedRow
-          : styles.feedRowBig
-      }
+          ? {height: componentWidth/3}
+          : {height: componentWidth/3*2}
+        ]}
+        onLayout={(event) => {
+          setComponentWidth(event.nativeEvent.layout.width)
+        }}
     >
-      <FeedComponent feedData={feedsRowData[0]} navigation={navigation} />
-      <FeedComponent feedData={feedsRowData[1]} navigation={navigation} />
-      <FeedComponent feedData={feedsRowData[2]} navigation={navigation} />
+      <FeedComponent feedData={feedsRowData[0]} navigation={navigation} componentWidth={componentWidth}/>
+      <FeedComponent feedData={feedsRowData[1]} navigation={navigation} componentWidth={componentWidth} />
+      <FeedComponent feedData={feedsRowData[2]} navigation={navigation} componentWidth={componentWidth} />
     </View>
   );
 }
 
-function FeedComponent({ feedData, navigation }) {
-  const [blur, setBlur] = useState(0);
+function FeedComponent({ feedData, navigation, componentWidth }) {
   return (
-    <View
-      style={
+    <PostThumbnail
+      postId={feedData.postId}
+      authorId={feedData.postByUserId}
+      style = {[styles.feedComponent,
         feedData.firstFeedType === "image"
-          ? styles.feedComponent
-          : styles.feedComponentBig
-      }
-    >
-      <BlurView intensity={100} style={{ flex: 1 }}>
-        <Pressable
-          style={{ flex: 1 }}
-          //onPress={() => navigation.navigate("FeedsDetail")}
-          onPress={() => {
-            setBlur(100);
-            console.log("press");
-          }}
-        >
-          <Image
-            style={{ flex: 1 }}
-            source={{
-              uri:
-                "http://192.168.3.20:3000/post/" + feedData.postId + "/content",
-            }}
-          />
-        </Pressable>
-      </BlurView>
-    </View>
+          ? {width: componentWidth/3 -1,height: componentWidth/3 -1}
+          : {width: componentWidth/3*2 -1 ,height: componentWidth/3*2 -1}
+      ]}
+    />
   );
 }
 
@@ -142,7 +126,7 @@ export default function ExplorerStackScreen() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Profile"
+        name="ExploreScreen"
         component={ExplorerScreen}
         options={({ navigation }) => ({
           headerTitle: "",
@@ -157,12 +141,24 @@ export default function ExplorerStackScreen() {
           ),
         })}
       />
-      <Stack.Screen
-        name="FeedsDetail"
-        component={FeedsDetailContainer}
+      <Stack.Screen 
+        name="PostsDetailScreen"
+        component={PostsDetailScreen}
         options={({ navigation }) => ({
-          headerTitle: "",
-          headerStyle: { height: 44 },
+          headerShown: false,
+          cardStyle: { backgroundColor: 'rgba(0, 0, 0,0.5)' },
+          presentation: "transparentModal",
+          gestureEnabled:false,
+          transitionSpec: {
+            open: {
+              animation: "timing",
+              config: { duration: 100, easing: Easing.bezier(0,.68,1,1) },
+            },
+            close: {
+              animation: "timing",
+              config: { duration: 100, easing: Easing.bezier(1,.02,1,.3) },
+            },
+          },
           headerRight: ({ color }) => (
             <Icon
               onPress={() => navigation.push("Chat")}

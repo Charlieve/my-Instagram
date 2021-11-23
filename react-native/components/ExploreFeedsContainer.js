@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from "react";
 import { FlatList } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
 import {
   fetchFeed,
   initalizeFeed,
@@ -10,8 +11,7 @@ import {
 
 import Feed from "../components/Feed";
 
-
-export default function FeedsContainer({ navigation }) {
+export default function ExploreFeedsContainer({ navigation,postId,AuthorId }) {
   const dispatch = useDispatch();
   const status = useSelector(selectFeedsStatus);
   const onEndReachedAction = () => {
@@ -35,10 +35,11 @@ export default function FeedsContainer({ navigation }) {
   useEffect(()=>{
     status=== 'idle' && initalizeFeedAction()
   })
+  const [data, setData] = useState([postId]);
   return (
     <FlatList
       style={{ flex: 1, width: "100%" }}
-      data={useSelector(selectFeeds)}
+      data={data}
       renderItem={({ item }) => (
         <Feed feedData={item} postId={item} navigation={navigation} />
       )}
@@ -51,3 +52,4 @@ export default function FeedsContainer({ navigation }) {
     />
   );
 }
+

@@ -46,7 +46,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     res.sendFile("/src/pages/index.html", { root: __dirname });
   });
 
-  app.route("/users/:id/userimage").get((req, res) => {
+  app.route("/users/:id/userimage.png").get((req, res) => {
     const requestingId = req.params.id;
     DBUsers.findOne({ userId: requestingId }, function (err, user) {
       if (err) {
@@ -398,7 +398,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
 
   //GET POST CONTENT
 
-  app.route("/post/:id/content").get(async (req, res) => {
+  app.route("/post/:id/content.jpeg").get(async (req, res) => {
     const requestingId = req.params.id;
     try {
       const postContentId = (

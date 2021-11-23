@@ -110,7 +110,7 @@ export default function CommentInput({ postId }) {
           <Image
             style={styles.css.commentInputUserImage}
             source={{
-              uri: `http://192.168.3.20:3000/users/${userId}/userimage`,
+              uri: `http://192.168.3.20:3000/users/${userId}/userimage.png`,
             }}
           />
           <View style={styles.css.commentInputTextInput}>

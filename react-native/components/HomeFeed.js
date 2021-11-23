@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Button, Text, View, Image } from "react-native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Button, Text, View, Image,Easing } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
 import { useTheme } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Logo from "../logo/instagram-logo";
@@ -8,8 +8,9 @@ import createStyles from "../styles/styles";
 
 import FeedsContainer from "./FeedsContainer";
 import OtherUserProfileScreen from "./OtherUserProfileScreen";
+import PostsDetailScreen from './PostsDetailScreen'
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 function HomeFeedScreen({ navigation }) {
   return (
@@ -29,7 +30,6 @@ export default function HomeFeedStackScreen() {
         component={HomeFeedScreen}
         options={({ navigation }) => ({
           headerTitle: "",
-          headerStyle: { height: 44 },
           headerLeft: () => <Logo fillcolor={styles.colors.text} />,
           headerRight: () => (
             <Icon
@@ -49,13 +49,41 @@ export default function HomeFeedStackScreen() {
           headerTitle: route.params.userId,
           headerTitleAlign: 'center',
           headerTitleStyle: { fontSize: 14},
-          headerStyle: { height: 44 },
+          headerStyle: { height: 60 },
           headerLeft: () => (
             <Icon
               onPress={() => navigation.goBack()}
               name="chevron-back"
               color={styles.colors.text}
               size={40}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen 
+        name="PostsDetailScreen"
+        component={PostsDetailScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+          cardStyle: { backgroundColor: 'rgba(0, 0, 0,0.5)' },
+          presentation: "transparentModal",
+          gestureEnabled:false,
+          transitionSpec: {
+            open: {
+              animation: "timing",
+              config: { duration: 100, easing: Easing.bezier(0,.68,1,1) },
+            },
+            close: {
+              animation: "timing",
+              config: { duration: 100, easing: Easing.bezier(1,.02,1,.3) },
+            },
+          },
+          headerRight: ({ color }) => (
+            <Icon
+              onPress={() => navigation.push("Chat")}
+              name="chatbubble-ellipses-outline"
+              color={color}
+              size={28}
             />
           ),
         })}

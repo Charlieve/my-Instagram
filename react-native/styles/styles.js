@@ -43,8 +43,46 @@ export default function createStyles() {
       fontWeight: "600",
     },
 
-    feed: {
+    custumizeHeader: {
       width: "100%",
+      height: 44,
+      backgroundColor: colors.background,
+      borderBottomWidth:1,
+      borderBottomColor: colors.border,
+      justifyContent: "space-between",
+      flexDirection: "row",
+    },
+
+    feedContainer: {
+      width: "100%",
+    },
+    feedHeaderContainer: {
+      height: 60,
+      flexDirection: "row",
+      alignContent: "space-between",
+    },
+    feedHeaderAuthorContainer: {
+      flex: 1,
+      height: "100%",
+      paddingTop: 14,
+      paddingBottom: 14,
+      paddingLeft: 16,
+      flexDirection: "row",
+    },
+    feedHeaderAuthor: {
+      height: "100%",
+      paddingLeft: 12,
+      flexDirection: "column",
+      alignContent: "space-between",
+      justifyContent: "center",
+    },
+    feedHeaderAction: {
+      width: 48,
+      height: "100%",
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingRight: 8,
+      justifyContent: "center",
     },
     profileBody: {
       flex: 1,
@@ -217,13 +255,13 @@ export default function createStyles() {
       borderTopRightRadius: 20,
       marginBottom: -180,
     },
-    actionTipsBar:{
-      width:40,
-      height:4,
-      borderRadius:20,
-      backgroundColor: 'rgba(128,128,128,0.3)',
-      marginBottom:15,
-      transform:[{translateY:-5}]
+    actionTipsBar: {
+      width: 40,
+      height: 4,
+      borderRadius: 20,
+      backgroundColor: "rgba(128,128,128,0.3)",
+      marginBottom: 15,
+      transform: [{ translateY: -5 }],
     },
     actionButton: {
       flex: 1,
@@ -243,6 +281,23 @@ export default function createStyles() {
       width: "100%",
       padding: 15,
       alignItems: "center",
+    },
+
+    feedAnimationPreviewHeader: {
+      width: "100%",
+      height: 50,
+      backgroundColor: colors.border,
+      flexDirection: "row",
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      alignItems: "center",
+    },
+    feedAnimationActionListButton: {
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingRight: 20,
+      paddingLeft: 20,
     },
   });
   const style = { colors, css };
