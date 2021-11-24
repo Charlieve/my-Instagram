@@ -8,8 +8,8 @@ import {
   StyleSheet,
   PanResponder,
   Image,
+  Dimensions,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 
 import createStyles from "../styles/styles";
@@ -22,28 +22,20 @@ export default function AnimationFeedScreen({ navigation, route }) {
   const progress = useRef(new Animated.Value(0)).current;
   const panValue = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const listShow = useRef(new Animated.Value(1)).current;
-  const { measure, postData, postId, authorId } = route.params;
-  const offsetX = measure.width * 0.2 - measure.x;
+  const windowWidth = Dimensions.get("window").width>800?800:Dimensions.get("window").width;
+  const { measure, postData, postId, authorId, currentStack } = route.params;
+  const offsetX = (windowWidth / 3) * 0.2 - measure.x;
   const offsetY = 40 - measure.y;
+
+  const imageSrc = postData
+    ? "data:image/png;base64," + postData
+    : `http://192.168.3.20:3000/post/${postId}/content.jpeg`;
   const panValueResponder = useRef(
     PanResponder.create({
       //onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: () => true,
-      // onPanResponderGrant: () => {
-      //   panValue.setOffset({
-      //     x: panValue.x._value,
-      //     y: panValue.y._value
-      //   });
-      // },
+      onMoveShouldSetPanResponder: (event, gestureState) =>
+        (gestureState.dx !== 0 || gestureState.dy !== 0) && true,
       onPanResponderMove:
-        // if(gestureState.dy>100){
-        //   Animated.timing(listShow,{
-        //     toValue: 0,
-        //     duration: 500,
-        //     useNativeDriver: false,
-        //     easing: Easing.out(Easing.exp),
-        //   })
-        // }
         Animated.event([null, { dx: panValue.x, dy: panValue.y }], {
           listener: (event, gestureState) => {
             if (listShow._value > 0.01) {
@@ -68,9 +60,6 @@ export default function AnimationFeedScreen({ navigation, route }) {
           },
           useNativeDriver: false,
         }),
-      // onPanResponderRelease: () => {
-      //   panValue.flattenOffset();
-      // }
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy > 400 || gestureState.vy > 0.8) {
           Animated.timing(progress, {
@@ -114,12 +103,15 @@ export default function AnimationFeedScreen({ navigation, route }) {
       intensity={0}
       tint="dark"
     >
-      <View
+      <Animated.View
         style={[
           StyleSheet.absoluteFill,
           {
             backgroundColor: "black",
-            opacity: 0.7,
+            opacity: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0,0.7]
+            }),
           },
         ]}
       >
@@ -135,12 +127,12 @@ export default function AnimationFeedScreen({ navigation, route }) {
             setTimeout(() => navigation.goBack(), 200);
           }}
         />
-      </View>
+      </Animated.View>
       <Animated.View
         style={[
           {
-            width: measure.width * 2.6,
-            height: measure.height * 2.6 + 50,
+            width: (windowWidth / 3) * 2.6,
+            height: (windowWidth / 3) * 2.6 + 50,
             position: "absolute",
             top: measure.y,
             left: measure.x,
@@ -157,8 +149,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   progress.interpolate({
                     inputRange: [-1, 0, 1],
                     outputRange: [
-                      -measure.height * 0.8 - 35,
-                      -measure.height * 0.8 - 35,
+                      -(windowWidth / 3) * 0.8 - 35,
+                      -(windowWidth / 3) * 0.8 - 35,
                       offsetY,
                     ],
                   }),
@@ -173,8 +165,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   progress.interpolate({
                     inputRange: [-1, 0, 1],
                     outputRange: [
-                      -measure.width * 0.8,
-                      -measure.width * 0.8,
+                      -(windowWidth / 3) * 0.8,
+                      -(windowWidth / 3) * 0.8,
                       offsetX,
                     ],
                   }),
@@ -199,13 +191,13 @@ export default function AnimationFeedScreen({ navigation, route }) {
             ],
           },
         ]}
-        //  {...panValueResponder.panHandlers}
+        {...panValueResponder.panHandlers}
       >
         <Pressable
           style={{ height: "100%" }}
           onPress={() => {
             navigation.goBack();
-            navigation.push("PostsDetailScreen", {
+            navigation.push(currentStack + "PostsDetailScreen", {
               measure,
               postData,
               postId,
@@ -249,18 +241,18 @@ export default function AnimationFeedScreen({ navigation, route }) {
             style={{
               flex: 1,
             }}
-            source={{ uri: "data:image/png;base64," + postData }}
+            source={{ uri: imageSrc }}
           />
         </Pressable>
       </Animated.View>
       <Animated.View
         style={[
           {
-            width: measure.width * 1.8,
+            width: (windowWidth / 3) * 1.8,
             backgroundColor: styles.colors.subButton,
             position: "absolute",
-            top: measure.height * 2.6 + 100,
-            left: measure.x + (measure.width - measure.x * 3) * 0.2,
+            top: (windowWidth / 3) * 2.6 + 100,
+            left: measure.x + ((windowWidth / 3) - measure.x * 3) * 0.2,
             borderRadius: 10,
           },
           {
@@ -281,7 +273,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
                     progress.interpolate({
                       inputRange: [0, 1],
                       outputRange: [
-                        measure.y - (measure.height * 2.6 + 100) + 60,
+                        measure.y - ((windowWidth / 3) * 2.6 + 100) + 60,
                         0,
                       ],
                     }),
@@ -301,16 +293,16 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   progress.interpolate({
                     inputRange: [0, 1],
                     outputRange: [
-                      ((measure.width - measure.x) / measure.width) *
-                        (measure.width * -0.8),
+                      (((windowWidth / 3) - measure.x) / (windowWidth / 3)) *
+                        ((windowWidth / 3) * -0.8),
                       0,
                     ],
                   }),
                   Animated.multiply(progress, listShow).interpolate({
                     inputRange: [0, 1, 2],
                     outputRange: [
-                      ((measure.width - measure.x) / measure.width) *
-                        (measure.width * -0.8),
+                      (((windowWidth / 3) - measure.x) / (windowWidth / 3)) *
+                        ((windowWidth / 3) * -0.8),
                       0,
                       0,
                     ],

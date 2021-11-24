@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import {
   Button,
   Text,
@@ -18,10 +18,12 @@ import axios from "axios";
 import { BlurView } from "expo-blur";
 import PostThumbnail from "./PostThumbnail"
 import PostsDetailScreen from "./PostsDetailScreen"
+import OtherUserProfileScreen from "./OtherUserProfileScreen"
+import createStyles from "../styles/styles";
 
 const Stack = createStackNavigator();
 
-const styles = StyleSheet.create({
+const FeedStyles = StyleSheet.create({
   feeds: {
     width: "100%",
   },
@@ -54,7 +56,7 @@ const styles = StyleSheet.create({
 
 function Feeds({ feedsData, navigation }) {
   return (
-    <View style={styles.feeds}>
+    <View style={FeedStyles.feeds}>
       <FeedRow feedsRowData={feedsData.feedRow01} navigation={navigation} />
       <FeedRow feedsRowData={feedsData.feedRow02} navigation={navigation} />
       <FeedRow feedsRowData={feedsData.feedRow03} navigation={navigation} />
@@ -66,7 +68,7 @@ function FeedRow({ feedsRowData, navigation }) {
   const [componentWidth,setComponentWidth] = useState(Math.min(800,Dimensions.get('window').width))
   return (
     <View
-      style={[styles.feedRow,
+      style={[FeedStyles.feedRow,
         feedsRowData[0].firstFeedType === "image"
           ? {height: componentWidth/3}
           : {height: componentWidth/3*2}
@@ -87,7 +89,7 @@ function FeedComponent({ feedData, navigation, componentWidth }) {
     <PostThumbnail
       postId={feedData.postId}
       authorId={feedData.postByUserId}
-      style = {[styles.feedComponent,
+      style = {[FeedStyles.feedComponent,
         feedData.firstFeedType === "image"
           ? {width: componentWidth/3 -1,height: componentWidth/3 -1}
           : {width: componentWidth/3*2 -1 ,height: componentWidth/3*2 -1}
@@ -97,12 +99,21 @@ function FeedComponent({ feedData, navigation, componentWidth }) {
 }
 
 function ExplorerScreen({ navigation }) {
-  const [data, setData] = useState([DemoJSON]);
+  const [data, setData] = useState([]);
   const onEndReachedAction = async () => {
     const fetchData = (await axios.get("http://192.168.3.20:3000/api/explore"))
       .data;
     setData([...data, fetchData]);
   };
+  useEffect(() => {
+    if(data.length===0){
+      (async () => {
+        const fetchData = (await axios.get("http://192.168.3.20:3000/api/explore"))
+          .data;
+        setData([fetchData]);
+      })()
+    }
+  },[data])
   return (
     <FlatList
       data={data}
@@ -115,7 +126,7 @@ function ExplorerScreen({ navigation }) {
         onEndReachedAction();
       }}
       onRefresh={() => {
-        setData([DemoJSON]);
+        setData([]);
       }}
       refreshing={false}
     />
@@ -123,6 +134,7 @@ function ExplorerScreen({ navigation }) {
 }
 
 export default function ExplorerStackScreen() {
+  const styles = createStyles();
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -130,19 +142,30 @@ export default function ExplorerStackScreen() {
         component={ExplorerScreen}
         options={({ navigation }) => ({
           headerTitle: "",
-          headerStyle: { height: 44 },
-          headerRight: ({ color }) => (
+          headerStyle: { height: 20 },
+        })}
+      />
+      <Stack.Screen
+        name="ExploreOtherUserProfileScreen"
+        component={OtherUserProfileScreen}
+        options={({ navigation, route }) => ({
+          headerShown: true,
+          headerTitle: route.params.userId,
+          headerTitleAlign: 'center',
+          headerTitleStyle: { fontSize: 14},
+          headerStyle: { height: 60 },
+          headerLeft: () => (
             <Icon
-              onPress={() => navigation.push("Chat")}
-              name="chatbubble-ellipses-outline"
-              color={color}
-              size={28}
+              onPress={() => navigation.goBack()}
+              name="chevron-back"
+              color={styles.colors.text}
+              size={40}
             />
           ),
         })}
       />
       <Stack.Screen 
-        name="PostsDetailScreen"
+        name="ExplorePostsDetailScreen"
         component={PostsDetailScreen}
         options={({ navigation }) => ({
           headerShown: false,

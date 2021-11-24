@@ -6,9 +6,9 @@ const initialState = {
   userInfo: {},
 };
 
-export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
+export const fetchUser = createAsyncThunk("user/fetchUser", async (userId) => {
   const response = await axios.get(
-    "http://192.168.3.20:3000/api/user/BOT.exar_kun_captain_rex"
+    "http://192.168.3.20:3000/api/user/" + userId
   ).then(response => response.data)
   .catch((error) => {console.error(error)})
   return response;

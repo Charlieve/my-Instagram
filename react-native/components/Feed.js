@@ -19,6 +19,7 @@ export function FeedHeader({
   postAuthor,
   location,
   postAuthorType,
+  currentStack
 }) {
   const styles = createStyles();
   return (
@@ -26,7 +27,8 @@ export function FeedHeader({
       <View style={styles.css.feedHeaderAuthorContainer}>
         <TouchableOpacity
           onPress={() =>
-            navigation.push("OtherUserProfileScreen", { userId: postAuthor })
+            navigation.push(
+              currentStack + "OtherUserProfileScreen", { userId: postAuthor })
           }
         >
           <Image
@@ -40,7 +42,7 @@ export function FeedHeader({
           <TouchableOpacity
             style={{ flexDirection: "row" }}
             onPress={() =>
-              navigation.push("OtherUserProfileScreen", {
+              navigation.push(currentStack + "OtherUserProfileScreen", {
                 userId: postAuthor,
               })
             }
@@ -64,7 +66,7 @@ export function FeedHeader({
       </View>
       <View style={styles.css.feedHeaderAction}>
         <Icon
-          onPress={() => navigation.navigate("FeedAction")}
+          onPress={() => navigation.navigate("BottomSheet")}
           name="ellipsis-horizontal"
           color={styles.colors.text}
           size={20}
@@ -132,6 +134,7 @@ export function FeedContent({
   setHighlightComment,
   postDate,
   commentQty,
+  currentStack
 }) {
   const styles = createStyles();
   return (
@@ -164,7 +167,7 @@ export function FeedContent({
           style={{ padding: 8 }}
         />
         <Icon
-          onPress={() => navigation.goBack()}
+          //onPress={() => navigation.goBack()}
           name="paper-plane-outline"
           color={styles.colors.text}
           size={24}
@@ -172,7 +175,7 @@ export function FeedContent({
         />
         <View style={{ marginLeft: "auto", marginRight: -10 }}>
           <Icon
-            onPress={() => navigation.goBack()}
+            //onPress={() => navigation.goBack()}
             name="bookmark-outline"
             color={styles.colors.text}
             size={24}
@@ -196,7 +199,7 @@ export function FeedContent({
               <Text
                 style={styles.css.boldFont}
                 onPress={() =>
-                  navigation.push("OtherUserProfileScreen", {
+                  navigation.push(currentStack + "OtherUserProfileScreen", {
                     userId: postAuthor,
                   })
                 }
@@ -354,6 +357,7 @@ function LikeComponent({
 
 export default function Feed({ postId }) {
   const navigation = useNavigation();
+  const currentStack = navigation.getState().routeNames[0].replace("Screen", "");
   const userId = useSelector(selectUserId);
   const styles = createStyles();
   let feed = DemoJSON;
@@ -408,6 +412,7 @@ export default function Feed({ postId }) {
           postAuthorType={postAuthorType}
           location={location}
           navigation={navigation}
+          currentStack={currentStack}
         />
         <FeedImage
           userId={userId}
@@ -432,6 +437,7 @@ export default function Feed({ postId }) {
           setHighlightComment={setHighlightComment}
           postDate={postDate}
           commentQty={commentQty}
+          currentStack={currentStack}
         />
       </View>
     );

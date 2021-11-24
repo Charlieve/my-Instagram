@@ -1,5 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
+  FlatList,
+  Image,
   Animated,
   Easing,
   View,
@@ -7,6 +9,7 @@ import {
   Pressable,
   StyleSheet,
   PanResponder,
+  TouchableOpacity,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
@@ -14,15 +17,18 @@ import { useCardAnimation } from "@react-navigation/stack";
 
 import createStyles from "../styles/styles";
 
-import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
+import axios from "axios";
+import store from "../app/store";
+import { useSelector } from "react-redux";
+import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
 
-export default function FeedActionStackScreen({ navigation }) {
+export default function ModalStackScreen({ navigation }) {
   const styles = createStyles();
   const bottomSheet = useRef(new Animated.ValueXY({ x: 0, y: 500 })).current;
   const bottomSheetResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event([null, { dy: bottomSheet.y }], {
         useNativeDriver: false,
       }),
@@ -46,6 +52,38 @@ export default function FeedActionStackScreen({ navigation }) {
       },
     })
   ).current;
+
+  const [bots, setBots] = useState();
+  const botSelecter = ({ item }) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          console.log("press");
+          store.dispatch(fetchUser(item.id));
+        }}
+      >
+        <View
+          style={{
+            height: 40,
+            width: 40,
+            alignItems: "center",
+            margin: 5,
+          }}
+        >
+          <Image
+            style={{
+              height: "100%",
+              aspectRatio: 1,
+              borderRadius: 50,
+            }}
+            source={{
+              uri: `http://192.168.3.20:3000/users/${item.id}/userimage.png`,
+            }}
+          />
+        </View>
+      </TouchableOpacity>
+    );
+  };
   useEffect(() => {
     Animated.timing(bottomSheet, {
       toValue: { x: 0, y: 0 },
@@ -54,9 +92,16 @@ export default function FeedActionStackScreen({ navigation }) {
       easing: Easing.out(Easing.exp),
     }).start();
     console.log(bottomSheet.y);
-  }),
-    [];
-  // const { current } = useCardAnimation();
+    (async () => {
+      const getBots = await axios.get("http://192.168.3.20:3000/api/bots");
+      const botsArr = [];
+      for (let bot of getBots.data) {
+        botsArr.push({ id: bot.userId });
+      }
+      console.log(botsArr);
+      setBots(botsArr);
+    })();
+  }, []);
   return (
     <View
       style={{
@@ -67,13 +112,13 @@ export default function FeedActionStackScreen({ navigation }) {
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
-          {
-            backgroundColor: "black",
-            opacity: bottomSheet.y.interpolate({
-              inputRange: [-1, 0, 300,301],
-              outputRange: [0.7, 0.7, 0,0],
-            }),
-          },
+          // {
+          //   backgroundColor: "white",
+          //   opacity: bottomSheet.y.interpolate({
+          //     inputRange: [-1, 0, 300,301],
+          //     outputRange: [0.7, 0.7, 0,0],
+          //   }),
+          // },
         ]}
       >
         <Pressable
@@ -106,48 +151,23 @@ export default function FeedActionStackScreen({ navigation }) {
         {...bottomSheetResponder.panHandlers}
       >
         <View style={styles.css.actionTipsBar} />
-        <View style={{width:"100%", flexDirection: "row", justifyContent: "space-around" }}>
-          <Pressable style={styles.css.actionButton}>
-            <Icon name="share-outline" color={styles.colors.text} size={26} />
-            <Text
-              style={[styles.css.normalFont, { fontSize: 12, marginTop: 4 }]}
-            >
-              Share to...
-            </Text>
-          </Pressable>
-          <Pressable style={styles.css.actionButton}>
-            <Icon name="link-outline" color={styles.colors.text} size={26} />
-            <Text
-              style={[styles.css.normalFont, { fontSize: 12, marginTop: 4 }]}
-            >
-              Copy link
-            </Text>
-          </Pressable>
-          <Pressable style={styles.css.actionButton}>
-            <Icon
-              name="warning-outline"
-              color={styles.colors.warning}
-              size={26}
-            />
-            <Text
-              style={[
-                styles.css.normalFont,
-                { fontSize: 12, marginTop: 4, color: styles.colors.warning },
-              ]}
-            >
-              Report
-            </Text>
-          </Pressable>
-        </View>
-        <View style={{ width: "100%", padding: 5, flexDirection: "row" }}>
-          <View style={styles.css.actionList}>
-            <Pressable style={styles.css.actionListButton}>
-              <Text style={styles.css.normalFont}>User Profile</Text>
-            </Pressable>
-            <Pressable style={styles.css.actionListButton}>
-              <Text style={styles.css.normalFont}>Follow</Text>
-            </Pressable>
-          </View>
+        <Text style={styles.css.boldFont}>Switch Account</Text>
+
+        <View
+          style={{
+            width: "100%",
+            overflow: "hidden",
+            marginTop:10,
+            marginBottom: 10,
+          }}
+        >
+          <FlatList
+            data={bots}
+            renderItem={botSelecter}
+            keyExtractor={(item, index) => "bot" + index}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+          />
         </View>
       </Animated.View>
     </View>

@@ -52,6 +52,11 @@ export default function createStyles() {
       justifyContent: "space-between",
       flexDirection: "row",
     },
+    custumizeHeaderTitle:{
+      color: colors.text,
+      fontWeight:'700',
+      fontSize:20,
+    },
 
     feedContainer: {
       width: "100%",

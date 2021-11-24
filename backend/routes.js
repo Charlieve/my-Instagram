@@ -1,12 +1,9 @@
 const passport = require("passport");
 const bcrypt = require("bcryptjs");
-//const fetch = require('node-fetch')
 const sharp = require("sharp");
 const axios = require("axios");
 const { nanoid } = require("nanoid");
-const { Binary } = require("mongodb");
 const multer = require("multer");
-//const async = require('async')
 
 module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
   const postContentUpload = multer({
@@ -14,7 +11,6 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       fileSize: 2000000,
     },
     fileFilter(req, file, cb) {
-      // 只接受三種圖片格式
       if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
         cb(new Error("Please upload an image"));
       }
@@ -145,7 +141,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           password: "password",
           createDate: Date.now(),
           lastLoginDate: Date.now(),
-          bio: "TATATATADADADADADA",
+          bio: "NEVER GONNA GIVE YOU UP",
           userImage,
           postQty: 0,
           posts: [],
@@ -163,16 +159,20 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     }
   });
 
-  //ADD NEW POSTS
+  //ADD NEW POSTS BY BOTS
   app.route("/addnewposts").post(async (req, res, next) => {
     try {
       const qty = req.body.qty > 10 ? 10 : req.body.qty;
-      const quotes = (
+      const quotes=[]
+      for (let i = 0; i < qty; i++) {
+        console.log('a')
         await axios.get(
-          "https://goquotes-api.herokuapp.com/api/v1/random?count=" +
-            String(qty)
-        )
-      ).data.quotes;
+          "http://metaphorpsum.com/paragraphs/" +
+            String(Math.round(Math.random() * 3) + 1) +
+            "/" +
+            String(Math.round(Math.random() * 5) + 1)
+        ).then(res=>quotes.push(res.data));
+      }
       const imagePaths = (
         await axios.get(
           "https://api.unsplash.com/photos/random/?client_id=-wzE0BIzONiuaXjvyLXnad4JXDvshui_8IK_UNnwuxA&count=" +
@@ -181,12 +181,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       ).data;
       const title = [];
       for (let [index, dataObj] of quotes.entries()) {
-        title.push(
-          `${dataObj.text} \n\n#${dataObj.author.replace(
-            " ",
-            ""
-          )} #${dataObj.tag.replace(" ", "")}`
-        );
+        title.push(dataObj+'\n\n#unsplash.com'+' #'+imagePaths[index].user.username);
       }
       const images = [];
       for (let [index, dataObj] of imagePaths.entries()) {
@@ -296,6 +291,17 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       }
     });
 
+  //GET BOTS
+  app.route("/api/bots").get(async (req, res) => {
+    try{
+      const bots = await findUsers({ userType: "bot" }, { _id: 0, userId: 1 });
+      res.send(bots)
+    }catch (error) {
+      res.send(error);
+    }
+  })
+
+
   //GET USER
 
   app.route("/api/user/:id").get(async (req, res) => {
@@ -385,7 +391,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
             postId: 1,
             postByUserId: 1,
           });
-          post.firstFeedType=i+j===0?'video':'image';
+          post.firstFeedType = i + j === 0 ? "video" : "image";
           postArr["feedRow0" + (i + 1)].push(post);
         }
       }

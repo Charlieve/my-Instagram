@@ -11,6 +11,8 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const PostThumbnail = ({ postData, postId, authorId, style }) => {
   const navigation = useNavigation();
+
+  const currentStack = navigation.getState().routeNames[0].replace("Screen", "");
   const progress = useRef(new Animated.Value(0)).current;
   const press = useRef(new Animated.Value(0)).current;
   const width = Dimensions.get("screen").width / 3 - 1;
@@ -64,7 +66,7 @@ const PostThumbnail = ({ postData, postId, authorId, style }) => {
           onPress={() => {
             thumbnail.current.measureInWindow((x, y, width, height) => {
               const measure = { x, y, width, height };
-              navigation.push("PostsDetailScreen", {
+              navigation.push(currentStack+"PostsDetailScreen", {
                 measure,
                 postData,
                 postId,
@@ -113,6 +115,7 @@ const PostThumbnail = ({ postData, postId, authorId, style }) => {
                   postData,
                   postId,
                   authorId,
+                  currentStack
                 });
               });
             }, 150);
@@ -125,9 +128,7 @@ const PostThumbnail = ({ postData, postId, authorId, style }) => {
             source={{
               uri: postData
                 ? "data:image/png;base64," + postData
-                : "http://192.168.3.20:3000/post/" +
-                  postId +
-                  "/content.jpeg",
+                : "http://192.168.3.20:3000/post/" + postId + "/content.jpeg",
             }}
           />
         </Pressable>

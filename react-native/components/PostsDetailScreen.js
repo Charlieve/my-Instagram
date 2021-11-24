@@ -97,147 +97,150 @@ export default function PostsDetailScreen({ route }) {
     return unsubscribe;
   }, [navigation]);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <Animated.View
+      style={[
+        { flex: 1 },
+        {
+          opacity: progress.interpolate({
+            inputRange: [0, 0.3, 0.4, 1],
+            outputRange: [1, 1, 1, 1],
+          }),
+          transform: [
+            {
+              translateX: Animated.add(
+                progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [
+                    -windowWidth / 2 + measure.x + measure.width / 2,
+                    0,
+                  ],
+                }),
+                Animated.multiply(progress, panValue.x).interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.6],
+                })
+              ),
+            },
+            {
+              translateY: Animated.add(
+                progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [
+                    measure.y -
+                      ((1 - measure.width / windowWidth) * windowHeight) / 2 +
+                      10 +
+                      ((2 / 3 - measure.width / windowWidth) * measure.width) /
+                        6,
+                    0,
+                  ],
+                }),
+                Animated.multiply(progress, panValue.y).interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.6],
+                })
+              ),
+            },
+            {
+              scale: Animated.add(
+                progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [measure.width / windowWidth, 1],
+                }),
+                Animated.multiply(progress, panValue.x).interpolate({
+                  inputRange: [-1, 0, 100, 500],
+                  outputRange: [0, 0, -0.03, -0.04],
+                  ease: Easing.easeOut,
+                })
+              ),
+            },
+          ],
+        },
+      ]}
+    >
       <Animated.View
-        style={[
-          { flex: 1 },
-          {
-            opacity: progress.interpolate({
-              inputRange: [0, 0.3, 0.4, 1],
-              outputRange: [1, 1, 1, 1],
+        style={{
+          backgroundColor: styles.colors.background,
+          paddingTop: 20,
+          borderRadius: Animated.add(
+            progress.interpolate({
+              inputRange: [0, 0.9, 1],
+              outputRange: [0, 0, 0],
             }),
-            transform: [
-              {
-                translateX: Animated.add(
-                  progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [
-                      -windowWidth / 2 + measure.x + measure.width / 2,
-                      0,
-                    ],
-                  }),
-                  Animated.multiply(progress, panValue.x).interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.6],
-                  })
-                ),
-              },
-              {
-                translateY: Animated.add(
-                  progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [
-                      measure.y -
-                        ((1 - measure.width / windowWidth) * windowHeight) / 2 +
-                        ((1 / 2 - measure.width / windowWidth) *
-                          measure.width) /
-                          6,
-                      0,
-                    ],
-                  }),
-                  Animated.multiply(progress, panValue.y).interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.6],
-                  })
-                ),
-              },
-              {
-                scale: Animated.add(
-                  progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [measure.width / windowWidth, 1],
-                  }),
-                  Animated.multiply(progress, panValue.x).interpolate({
-                    inputRange: [-1, 0, 100, 500],
-                    outputRange: [0, 0, -0.03, -0.04],
-                    ease: Easing.easeOut,
-                  })
-                ),
-              },
+            Animated.multiply(
+              progress,
+              panValue.x.interpolate({
+                inputRange: [-1, 0, 100, 101],
+                outputRange: [-1, 0, 20, 20],
+                easing: Easing.easeOut,
+              })
+            )
+          ),
+          height: progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [
+              (windowWidth / (windowHeight - 38)) * 100 + "%",
+              "100%",
             ],
-          },
-        ]}
+          }),
+          overflow: "hidden",
+        }}
       >
         <Animated.View
           style={{
-            borderRadius: Animated.add(
-              progress.interpolate({
-                inputRange: [0, 0.9, 1],
-                outputRange: [0, 0, 0],
-              }),
-              Animated.multiply(
-                progress,
-                panValue.x.interpolate({
-                  inputRange: [-1, 0, 100, 101],
-                  outputRange: [-1, 0, 20, 20],
-                  easing: Easing.easeOut,
-                })
-              )
-            ),
-            height: progress.interpolate({
+            marginTop: progress.interpolate({
               inputRange: [0, 1],
-              outputRange: [
-                (windowWidth / (windowHeight - 60)) * 100 + "%",
-                "100%",
-              ],
-              // outputRange:['100%','100%']
+              outputRange: [-130, 0],
             }),
-            overflow: "hidden",
           }}
-        >
-          <Animated.View
-            style={{
-              marginTop: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-110, 0],
-              }),
+        />
+        <View style={styles.css.custumizeHeader}>
+          <Icon
+            onPress={() => {
+              Animated.timing(progress, {
+                toValue: 0,
+                duration: 400,
+                useNativeDriver: false,
+                easing: Easing.bezier(0, 0.51, 0.33, 1),
+              }).start();
+              mainView.current.scrollTo({ x: 0, y: 0, animated: false });
+              setTimeout(() => navigation.goBack(), 250);
             }}
+            name="chevron-back"
+            color={styles.colors.text}
+            size={40}
           />
-          <View style={styles.css.custumizeHeader}>
-            <Icon
-              onPress={() => {
-                Animated.timing(progress, {
-                  toValue: 0,
-                  duration: 400,
-                  useNativeDriver: false,
-                  easing: Easing.bezier(0, 0.51, 0.33, 1),
-                }).start();
-                mainView.current.scrollTo({ x: 0, y: 0, animated: false });
-                setTimeout(() => navigation.goBack(), 250);
-              }}
-              name="chevron-back"
-              color={styles.colors.text}
-              size={40}
-            />
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Text style={[styles.css.subFont, styles.css.subBoldFont]}>
-                {authorId}
-              </Text>
-              <Text style={[styles.css.boldFont, { fontSize: 16 }]}>Posts</Text>
-            </View>
-            <Icon name="chevron-back" size={40} visible={false} />
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Text style={[styles.css.subFont, styles.css.subBoldFont]}>
+              {authorId}
+            </Text>
+            <Text style={[styles.css.boldFont, { fontSize: 16 }]}>Posts</Text>
           </View>
-          <ScrollView
-            style={{ backgroundColor: styles.colors.background }}
-            scrollEnabled={scrollable}
-            canCancelContentTouches={scrollable}
-            disableScrollViewPanResponder={true}
-            onTouchEnd={() => {
-              setScrollable(true);
-            }}
-            ref={mainView}
-          >
-            <View {...scrollResponder.panHandlers}>
-              <PostsDetailInitialPost
-                postId={postId}
-                postData={postData}
-                authorId={authorId}
-              />
-              {/* <PostsDetailContainer navigation={navigation}/> */}
-            </View>
-          </ScrollView>
-        </Animated.View>
+          <Icon
+            name="chevron-back"
+            size={40}
+            color={styles.colors.background}
+          />
+        </View>
+        <ScrollView
+          style={{ backgroundColor: styles.colors.background }}
+          scrollEnabled={scrollable}
+          canCancelContentTouches={scrollable}
+          disableScrollViewPanResponder={true}
+          onTouchEnd={() => {
+            setScrollable(true);
+          }}
+          ref={mainView}
+        >
+          <View {...scrollResponder.panHandlers}>
+            <PostsDetailInitialPost
+              postId={postId}
+              postData={postData}
+              authorId={authorId}
+            />
+            {/* <PostsDetailContainer navigation={navigation}/> */}
+          </View>
+        </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </Animated.View>
   );
 }

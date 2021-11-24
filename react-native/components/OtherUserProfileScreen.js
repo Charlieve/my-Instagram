@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Button, Text, View, Image, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import axios from 'axios'
+import axios from "axios";
 import createStyles from "../styles/styles";
 import ProfilePosts from "./ProfilePosts";
-import LoadingSpinner from './LoadingSpinner'
-
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function OtherUserProfileScreen({ navigation, route }) {
   const styles = createStyles();
   const [userInfo, setUserInfo] = useState({ status: "idle" });
   useEffect(() => {
-    const {userId} = route.params
+    const { userId } = route.params;
     let isMount = true;
     (async () => {
       const fetchUser = await axios.get(
@@ -19,29 +18,34 @@ export default function OtherUserProfileScreen({ navigation, route }) {
       );
       console.log(fetchUser.data);
       const userPostsArr = [];
-      for (let [index, data] of fetchUser.data.posts
-        .reverse()
-        .entries()) {
+      for (let [index, data] of fetchUser.data.posts.reverse().entries()) {
         userPostsArr[Math.floor(index / (3 * 1))] || userPostsArr.push([]);
-      userPostsArr[Math.floor(index / (3 * 1))].push({authorId:userId,postId:data});
+        userPostsArr[Math.floor(index / (3 * 1))].push({
+          authorId: userId,
+          postId: data,
+        });
       }
       while (userPostsArr[userPostsArr.length - 1].length % 3 !== 0) {
         userPostsArr[userPostsArr.length - 1].push("");
       }
 
-      setTimeout(()=>{
-        if(isMount){
-        setUserInfo({ status: "succeeded", ...fetchUser.data, userPostsArr })}
-      },1000)
+      setTimeout(() => {
+        if (isMount) {
+          setUserInfo({ status: "succeeded", ...fetchUser.data, userPostsArr });
+        }
+      }, 1000);
     })();
-    return () => {isMount = false}
+    return () => {
+      console.log("profile unmount");
+      isMount = false;
+    };
   }, [route]);
   if (userInfo.status === "idle") {
     return (
-      <View style={{flex:1, justifyContent: "center"}}>
-      <LoadingSpinner />
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <LoadingSpinner />
       </View>
-    )
+    );
   } else {
     return (
       <View style={styles.css.profileBody}>
@@ -50,7 +54,10 @@ export default function OtherUserProfileScreen({ navigation, route }) {
             <Image
               style={styles.css.userImage}
               source={{
-                uri: "http://192.168.3.20:3000/users/" + userInfo.userId + "/userimage.png",
+                uri:
+                  "http://192.168.3.20:3000/users/" +
+                  userInfo.userId +
+                  "/userimage.png",
               }}
             />
             <View style={styles.css.userInformationQtys}>

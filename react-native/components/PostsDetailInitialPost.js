@@ -11,6 +11,7 @@ import { FeedHeader, FeedImage, FeedContent } from "./Feed";
 
 export default function PostsDetailInitialPost({ postId, postData, authorId }) {
   const navigation = useNavigation();
+  const currentStack = navigation.getState().routeNames[0].replace("Screen", "");
   const userId = useSelector(selectUserId);
   const styles = createStyles();
   const postAuthor = authorId;
@@ -55,6 +56,7 @@ export default function PostsDetailInitialPost({ postId, postData, authorId }) {
         postAuthorType={postAuthorType}
         location={location}
         navigation={navigation}
+        currentStack={currentStack}
       />
       <FeedImage
         userId={userId}
@@ -79,6 +81,7 @@ export default function PostsDetailInitialPost({ postId, postData, authorId }) {
         setHighlightComment={setHighlightComment}
         postDate={postDate}
         commentQty={commentQty}
+        currentStack={currentStack}
       />
     </View>
   );

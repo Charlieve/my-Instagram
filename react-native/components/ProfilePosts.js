@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 import PostThumbnail from "./PostThumbnail";
-global.Buffer = global.Buffer || require("buffer").Buffer;
+import {Buffer} from "buffer";
 
 function PostGrid({ postsIdnAuthor, navigation }) {
   const [status, setStatus] = useState("idle");
@@ -19,6 +19,7 @@ function PostGrid({ postsIdnAuthor, navigation }) {
   const [contentData, setContentData] = useState([]);
   useEffect(() => {
     let isMount = true;
+    const cancelGetData = axios.CancelToken.source()
     const getData = (postIdnAuthor) => {
       return postIdnAuthor
         ? axios
@@ -26,15 +27,17 @@ function PostGrid({ postsIdnAuthor, navigation }) {
               `http://192.168.3.20:3000/post/${postIdnAuthor.postId}/content.jpeg`,
               {
                 responseType: "arraybuffer",
+                cancelToken: cancelGetData.token
               }
             )
             .then((res) => {
+              console.log('got data')
               return {
                 postId: postIdnAuthor.postId,
                 authorId: postIdnAuthor.authorId,
                 data: toBuffer(res.data),
-              };
-            })
+              }
+            }).catch((err) => {console.log(err)})
         : Promise.resolve("empty");
     };
     const toBuffer = (data) => {
@@ -49,8 +52,11 @@ function PostGrid({ postsIdnAuthor, navigation }) {
         setContentData(res);
       }
     });
+    console.log('promising')
     return () => {
+      console.log('unmount')
       isMount = false;
+      cancelGetData.cancel('cancel');
     };
   }, [postsIdnAuthor]);
   if (contentData.join() !== "") {

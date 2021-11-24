@@ -1,20 +1,12 @@
-import * as React from 'react';
-import { Button, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-const ActivityStack = createNativeStackNavigator();
+import React from 'react'
+import { View } from 'react-native'
+import NotCreateYet from './NotCreateYet'
 
 
 export default function ActivityStackScreen() {
   return (
-      /*--------------------------------------------------------------------------
-    <HomeStack.Navigator>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
-      <HomeStack.Screen name="Details" component={DetailsScreen} />
-    </HomeStack.Navigator>
-    ---*/
-    <View><Text>hello world</Text></View>
-  );
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <NotCreateYet />
+    </View>
+  )
 }
