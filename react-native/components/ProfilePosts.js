@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+import GLOBAL from "../GLOBAL.json";
 import {
   FlatList,
   View,
@@ -24,14 +25,13 @@ function PostGrid({ postsIdnAuthor, navigation }) {
       return postIdnAuthor
         ? axios
             .get(
-              `http://192.168.3.20:3000/post/${postIdnAuthor.postId}/content.jpeg`,
+              `${GLOBAL.SERVERIP}/post/${postIdnAuthor.postId}/content.jpeg`,
               {
                 responseType: "arraybuffer",
                 cancelToken: cancelGetData.token
               }
             )
             .then((res) => {
-              console.log('got data')
               return {
                 postId: postIdnAuthor.postId,
                 authorId: postIdnAuthor.authorId,
@@ -48,13 +48,10 @@ function PostGrid({ postsIdnAuthor, navigation }) {
     const getDataArr = postsIdnAuthor.map(getData);
     Promise.all(getDataArr).then((res) => {
       if (isMount) {
-        console.log("done");
         setContentData(res);
       }
     });
-    console.log('promising')
     return () => {
-      console.log('unmount')
       isMount = false;
       cancelGetData.cancel('cancel');
     };
@@ -108,7 +105,20 @@ function PostGrid({ postsIdnAuthor, navigation }) {
   }
 }
 
-export default function ProfilePosts({ navigation, postsArr }) {
+export default function ProfilePosts({ navigation, userPosts, userId }) {
+  console.log('rerend')
+  const [postsArr,setPostsArr] = useState([]);
+  useEffect(() => {
+    const updatedPostsArr = []
+    for (let [index, data] of [...userPosts].reverse().entries()) {
+      updatedPostsArr[Math.floor(index / (3 * 1))] || updatedPostsArr.push([]);
+      updatedPostsArr[Math.floor(index / (3 * 1))].push({authorId:userId,postId:data});
+    }
+    while(updatedPostsArr[updatedPostsArr.length-1].length %3 !==0){
+      updatedPostsArr[updatedPostsArr.length-1].push('')
+    }
+    setPostsArr(updatedPostsArr)
+  },[userPosts])
   return (
     <View style={{ flex: 1, width: "100%" }}>
       <FlatList

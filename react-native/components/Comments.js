@@ -1,3 +1,4 @@
+import GLOBAL from "../GLOBAL.json";
 import React, { useState, useEffect, createContext, useContext } from "react";
 import {
   View,
@@ -22,7 +23,6 @@ import { selectUserId } from "../features/user/userSlice";
 
 import { CommentContext } from "./CommentsProvider";
 
-
 function AllCommentsComponent({ AllcommentsData, postId }) {
   return (
     <CommentComponent
@@ -46,11 +46,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
             size={22}
             style={{ position: "absolute", top: 0, left: 0 }}
           />
-          <Icon
-            name={"alert-circle"}
-            color={styles.colors.warning}
-            size={22}
-          />
+          <Icon name={"alert-circle"} color={styles.colors.warning} size={22} />
         </View>
       );
     } else {
@@ -74,7 +70,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
                 "content-type": "application/json",
                 Accept: "application/json",
               },
-              url: "http://192.168.3.20:3000/api/likeComment/" + postId,
+              url: GLOBAL.SERVERIP + "/api/likeComment/" + postId,
               data: { userId: comment.userId, commentIndex: comment.index },
             });
           };
@@ -92,7 +88,7 @@ function CommentComponent({ AllcommentsData, index, style, postId }) {
                     <Image
                       style={styles.css.commentUserImage}
                       source={{
-                        uri: `http://192.168.3.20:3000/users/${comment.userId}/userimage.png`,
+                        uri: `${GLOBAL.SERVERIP}/users/${comment.userId}/userimage.png`,
                       }}
                     />
                   </View>
@@ -216,12 +212,9 @@ export default function CommentsStackScreen({ navigation, postId }) {
     let isMount = true;
     (async () => {
       const data = (
-        await axios.get(
-          "http://192.168.3.20:3000/post/" + postId + "/comments",
-          {
-            params: { userid: userId },
-          }
-        )
+        await axios.get(GLOBAL.SERVERIP + "/post/" + postId + "/comments", {
+          params: { userid: userId },
+        })
       ).data;
       const comments = data.comments;
       comments.map((comment, index) => {
@@ -249,52 +242,52 @@ export default function CommentsStackScreen({ navigation, postId }) {
     );
   } else {
     return (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={64}
-          style={{ flex: 1 }}
-        >
-          <View style={{ flex: 1, justifyContent: "space-around" }}>
-            <ScrollView style={{ flex: 1 }}>
-              <View style={styles.css.commentsBody}>
-                <View style={styles.css.topic}>
-                  <View style={styles.css.commentLeft}>
-                    <Image
-                      style={styles.css.commentUserImage}
-                      source={{
-                        uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage.png`,
-                      }}
-                    />
-                  </View>
-                  <View style={styles.css.commentRight}>
-                    <Text style={[styles.css.normalFont, { marginBottom: 10 }]}>
-                      <Text style={styles.css.boldFont}>{postAuthor}</Text>{" "}
-                      <ContentProcessor content={topic} />
-                    </Text>
-                    <TimeAgo
-                      style={styles.css.postDateFont}
-                      timestamp={postDate}
-                    />
-                  </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={64}
+        style={{ flex: 1 }}
+      >
+        <View style={{ flex: 1, justifyContent: "space-around" }}>
+          <ScrollView style={{ flex: 1 }}>
+            <View style={styles.css.commentsBody}>
+              <View style={styles.css.topic}>
+                <View style={styles.css.commentLeft}>
+                  <Image
+                    style={styles.css.commentUserImage}
+                    source={{
+                      uri: `${GLOBAL.SERVERIP}/users/${postAuthor}/userimage.png`,
+                    }}
+                  />
                 </View>
-                <View
-                  style={{
-                    borderBottomColor: styles.colors.border,
-                    borderBottomWidth: 1,
-                    marginBottom: 16,
-                  }}
-                />
-                <View>
-                  <AllCommentsComponent
-                    AllcommentsData={comments}
-                    postId={postId}
+                <View style={styles.css.commentRight}>
+                  <Text style={[styles.css.normalFont, { marginBottom: 10 }]}>
+                    <Text style={styles.css.boldFont}>{postAuthor}</Text>{" "}
+                    <ContentProcessor content={topic} />
+                  </Text>
+                  <TimeAgo
+                    style={styles.css.postDateFont}
+                    timestamp={postDate}
                   />
                 </View>
               </View>
-            </ScrollView>
-            <CommentInput postId={postId} />
-          </View>
-        </KeyboardAvoidingView>
+              <View
+                style={{
+                  borderBottomColor: styles.colors.border,
+                  borderBottomWidth: 1,
+                  marginBottom: 16,
+                }}
+              />
+              <View>
+                <AllCommentsComponent
+                  AllcommentsData={comments}
+                  postId={postId}
+                />
+              </View>
+            </View>
+          </ScrollView>
+          <CommentInput postId={postId} />
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 }

@@ -1,3 +1,4 @@
+import GLOBAL from "../GLOBAL.json";
 import React, { useContext } from "react";
 import { View, Text, Image, TextInput, Pressable } from "react-native";
 import createStyles from "../styles/styles";
@@ -44,7 +45,7 @@ export default function CommentInput({ postId }) {
               "content-type": "application/json",
               Accept: "application/json",
             },
-            url: "http://192.168.3.20:3000/api/pushComment/" + postId,
+            url: GLOBAL.SERVERIP +"/api/pushComment/" + postId,
             data: { userId, commentData: postCommentData },
           }).then((res) => (postCommentData.status = res.data));
           setComments([...comments.slice(0, commentIndex), postCommentData],...comments.slice(commentIndex+1));
@@ -110,7 +111,7 @@ export default function CommentInput({ postId }) {
           <Image
             style={styles.css.commentInputUserImage}
             source={{
-              uri: `http://192.168.3.20:3000/users/${userId}/userimage.png`,
+              uri: `${GLOBAL.SERVERIP}/users/${userId}/userimage.png`,
             }}
           />
           <View style={styles.css.commentInputTextInput}>

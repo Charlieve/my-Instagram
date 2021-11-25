@@ -1,3 +1,4 @@
+import GLOBAL from "../GLOBAL.json";
 import React, { useRef, useEffect, useState } from "react";
 import {
   Animated,
@@ -22,21 +23,23 @@ export default function AnimationFeedScreen({ navigation, route }) {
   const progress = useRef(new Animated.Value(0)).current;
   const panValue = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const listShow = useRef(new Animated.Value(1)).current;
-  const windowWidth = Dimensions.get("window").width>800?800:Dimensions.get("window").width;
+  const windowWidth =
+    Dimensions.get("window").width > 800 ? 800 : Dimensions.get("window").width;
   const { measure, postData, postId, authorId, currentStack } = route.params;
   const offsetX = (windowWidth / 3) * 0.2 - measure.x;
   const offsetY = 40 - measure.y;
 
   const imageSrc = postData
     ? "data:image/png;base64," + postData
-    : `http://192.168.3.20:3000/post/${postId}/content.jpeg`;
+    : `${GLOBAL.SERVERIP}/post/${postId}/content.jpeg`;
   const panValueResponder = useRef(
     PanResponder.create({
       //onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (event, gestureState) =>
         (gestureState.dx !== 0 || gestureState.dy !== 0) && true,
-      onPanResponderMove:
-        Animated.event([null, { dx: panValue.x, dy: panValue.y }], {
+      onPanResponderMove: Animated.event(
+        [null, { dx: panValue.x, dy: panValue.y }],
+        {
           listener: (event, gestureState) => {
             if (listShow._value > 0.01) {
               if (gestureState.dy > 80) {
@@ -59,7 +62,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
             }
           },
           useNativeDriver: false,
-        }),
+        }
+      ),
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy > 400 || gestureState.vy > 0.8) {
           Animated.timing(progress, {
@@ -110,7 +114,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
             backgroundColor: "black",
             opacity: progress.interpolate({
               inputRange: [0, 1],
-              outputRange: [0,0.7]
+              outputRange: [0, 0.7],
             }),
           },
         ]}
@@ -229,10 +233,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
                 marginRight: 10,
               }}
               source={{
-                uri:
-                  "http://192.168.3.20:3000/users/" +
-                  authorId +
-                  "/userimage.png",
+                uri: GLOBAL.SERVERIP + "/users/" + authorId + "/userimage.png",
               }}
             />
             <Text style={styles.css.normalFont}>{authorId}</Text>
@@ -252,7 +253,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
             backgroundColor: styles.colors.subButton,
             position: "absolute",
             top: (windowWidth / 3) * 2.6 + 100,
-            left: measure.x + ((windowWidth / 3) - measure.x * 3) * 0.2,
+            left: measure.x + (windowWidth / 3 - measure.x * 3) * 0.2,
             borderRadius: 10,
           },
           {
@@ -293,7 +294,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   progress.interpolate({
                     inputRange: [0, 1],
                     outputRange: [
-                      (((windowWidth / 3) - measure.x) / (windowWidth / 3)) *
+                      ((windowWidth / 3 - measure.x) / (windowWidth / 3)) *
                         ((windowWidth / 3) * -0.8),
                       0,
                     ],
@@ -301,7 +302,7 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   Animated.multiply(progress, listShow).interpolate({
                     inputRange: [0, 1, 2],
                     outputRange: [
-                      (((windowWidth / 3) - measure.x) / (windowWidth / 3)) *
+                      ((windowWidth / 3 - measure.x) / (windowWidth / 3)) *
                         ((windowWidth / 3) * -0.8),
                       0,
                       0,

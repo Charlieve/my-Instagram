@@ -70,7 +70,7 @@ export default function ProfileStackScreen({ user }) {
           headerTitle: route.params.userId,
           headerTitleAlign: "center",
           headerTitleStyle: { fontSize: 14 },
-          headerStyle: { height: 60 },
+          headerStyle: { height: 64 },
           headerLeft: () => (
             <Icon
               onPress={() => navigation.goBack()}

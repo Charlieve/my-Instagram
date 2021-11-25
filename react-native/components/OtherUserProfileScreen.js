@@ -1,22 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Button, Text, View, Image, StyleSheet } from "react-native";
+import { Button, Text, View, Image, TouchableOpacity } from "react-native";
+import GLOBAL from "../GLOBAL.json";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import createStyles from "../styles/styles";
 import ProfilePosts from "./ProfilePosts";
 import LoadingSpinner from "./LoadingSpinner";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectUserId,
+  selectUserFollowings,
+  followUser,
+} from "../features/user/userSlice";
 
 export default function OtherUserProfileScreen({ navigation, route }) {
   const styles = createStyles();
+  const dispatch = useDispatch();
   const [userInfo, setUserInfo] = useState({ status: "idle" });
+  const appUserId = useSelector(selectUserId);
+  const isFollowed = useSelector(selectUserFollowings).includes(
+    userInfo?.userId
+  );
+  console.log(userInfo);
   useEffect(() => {
     const { userId } = route.params;
     let isMount = true;
     (async () => {
       const fetchUser = await axios.get(
-        "http://192.168.3.20:3000/api/user/" + userId
+        GLOBAL.SERVERIP + "/api/user/" + userId
       );
-      console.log(fetchUser.data);
       const userPostsArr = [];
       for (let [index, data] of fetchUser.data.posts.reverse().entries()) {
         userPostsArr[Math.floor(index / (3 * 1))] || userPostsArr.push([]);
@@ -55,7 +67,8 @@ export default function OtherUserProfileScreen({ navigation, route }) {
               style={styles.css.userImage}
               source={{
                 uri:
-                  "http://192.168.3.20:3000/users/" +
+                  GLOBAL.SERVERIP +
+                  "/users/" +
                   userInfo.userId +
                   "/userimage.png",
               }}
@@ -105,19 +118,50 @@ export default function OtherUserProfileScreen({ navigation, route }) {
               {userInfo.bio}
             </Text>
           </View>
-          <View style={[styles.css.userActions]}>
-            <View style={[styles.css.userActionComponent]}>
-              <Text style={styles.css.superBoldFont}>Edit Profile</Text>
+          {userInfo.userId !== appUserId ? (
+            <View style={[styles.css.userActions]}>
+              <TouchableOpacity
+                style={[
+                  isFollowed
+                    ? styles.css.userActionComponent
+                    : styles.css.userActionComponentActivated,
+                ]}
+                onPress={() => {
+                  dispatch(followUser(userInfo.userId));
+                  isFollowed
+                    ? setUserInfo({
+                        ...userInfo,
+                        followerQty: userInfo.followerQty - 1,
+                      })
+                    : setUserInfo({
+                        ...userInfo,
+                        followerQty: userInfo.followerQty + 1,
+                      });
+                }}
+              >
+                <Text style={styles.css.superBoldFont}>
+                  {isFollowed ? "Following" : "Follow"}
+                </Text>
+              </TouchableOpacity>
+              <View style={[styles.css.userActionComponent]}>
+                <Text style={styles.css.superBoldFont}>Message</Text>
+              </View>
             </View>
-            <View style={[styles.css.userActionComponent]}>
-              <Text style={styles.css.superBoldFont}>Ad Tools</Text>
+          ) : (
+            <View style={[styles.css.userActions]}>
+              <View style={[styles.css.userActionComponent]}>
+                <Text style={styles.css.superBoldFont}>Edit Profile</Text>
+              </View>
+              <View style={[styles.css.userActionComponent]}>
+                <Text style={styles.css.superBoldFont}>Ad Tools</Text>
+              </View>
+              <View style={[styles.css.userActionComponent]}>
+                <Text style={styles.css.superBoldFont}>Insights</Text>
+              </View>
             </View>
-            <View style={[styles.css.userActionComponent]}>
-              <Text style={styles.css.superBoldFont}>Insights</Text>
-            </View>
-          </View>
+          )}
         </View>
-        <ProfilePosts postsArr={userInfo.userPostsArr} />
+        <ProfilePosts userPosts={userInfo.posts} userId={userInfo.userId} />
       </View>
     );
   }

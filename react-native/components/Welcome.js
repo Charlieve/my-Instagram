@@ -12,6 +12,7 @@ import axios from "axios";
 import store from "../app/store";
 import { useSelector } from "react-redux";
 import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
+import GLOBAL from '../GLOBAL.json'
 
 const Welcome = () => {
   const styles = createStyles();
@@ -42,7 +43,7 @@ const Welcome = () => {
               marginRight: 10,
             }}
             source={{
-              uri: `http://192.168.3.20:3000/users/${item.id}/userimage.png`,
+              uri: `${GLOBAL.SERVERIP}/users/${item.id}/userimage.png`,
             }}
           />
           <Text style={[styles.css.normalFont, { flex: 1, paddingRight: 20 }]}>
@@ -54,7 +55,7 @@ const Welcome = () => {
   };
   useEffect(() => {
     (async () => {
-      const getBots = await axios.get("http://192.168.3.20:3000/api/bots");
+      const getBots = await axios.get(GLOBAL.SERVERIP + "/api/bots");
       const botsArr = [];
       for (let bot of getBots.data) {
         botsArr.push({ id: bot.userId });
@@ -75,7 +76,7 @@ const Welcome = () => {
           height: 300,
           width: "80%",
           margin: 30,
-          backgroundColor: styles.colors.border,
+          backgroundColor: styles.colors.subButton,
           overflow: "hidden",
           borderRadius: 20,
         }}

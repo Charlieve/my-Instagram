@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import GLOBAL from "../GLOBAL.json";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import axios from "axios";
 import DemoJSON from "../demo/feed/feed1.json"; //delete
@@ -11,7 +12,9 @@ import { FeedHeader, FeedImage, FeedContent } from "./Feed";
 
 export default function PostsDetailInitialPost({ postId, postData, authorId }) {
   const navigation = useNavigation();
-  const currentStack = navigation.getState().routeNames[0].replace("Screen", "");
+  const currentStack = navigation
+    .getState()
+    .routeNames[0].replace("Screen", "");
   const userId = useSelector(selectUserId);
   const styles = createStyles();
   const postAuthor = authorId;
@@ -27,14 +30,12 @@ export default function PostsDetailInitialPost({ postId, postData, authorId }) {
     let isMount = true;
     (async () => {
       const feed = (
-        await axios.get("http://192.168.3.20:3000/api/post/" + postId, {
+        await axios.get(GLOBAL.SERVERIP + "/api/post/" + postId, {
           params: { userid: userId },
         })
       ).data;
       const author = (
-        await axios.get(
-          "http://192.168.3.20:3000/api/user/" + feed.postByUserId
-        )
+        await axios.get(GLOBAL.SERVERIP + "/api/user/" + feed.postByUserId)
       ).data;
       await new Promise((r) => setTimeout(r, 200)); //delay after transition finished
       setPostAuthorType(author.userType);
@@ -52,6 +53,7 @@ export default function PostsDetailInitialPost({ postId, postData, authorId }) {
   return (
     <View style={styles.css.feedContainer}>
       <FeedHeader
+        userId={userId}
         postAuthor={postAuthor}
         postAuthorType={postAuthorType}
         location={location}

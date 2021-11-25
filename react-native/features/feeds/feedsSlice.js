@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import GLOBAL from "../../GLOBAL.json";
 import axios from "axios";
 
 const initialState = {
@@ -8,7 +9,7 @@ const initialState = {
 
 const fetchFeedAction = async () => {
   const response = await axios
-    .get("http://192.168.3.20:3000/api/feed")
+    .get(GLOBAL.SERVERIP + "/api/feed")
     .then((response) => response.data)
     .catch((error) => {
       console.error(error);
@@ -17,33 +18,36 @@ const fetchFeedAction = async () => {
   return String(response);
 };
 
-export const fetchFeed = createAsyncThunk("feeds/fetchFeed", fetchFeedAction)
+export const fetchFeed = createAsyncThunk("feeds/fetchFeed", fetchFeedAction);
 
-export const initalizeFeed = createAsyncThunk("feeds/initalizeFeed", fetchFeedAction)
+export const initalizeFeed = createAsyncThunk(
+  "feeds/initalizeFeed",
+  fetchFeedAction
+);
 
 const feedsSlice = createSlice({
-    name: "feeds",
-    initialState: initialState,
-    reducers: {
-      feedLoadedChangeStatus(state, action) {
-        state.status = "succeeded";
-      },
+  name: "feeds",
+  initialState: initialState,
+  reducers: {
+    feedLoadedChangeStatus(state, action) {
+      state.status = "succeeded";
     },
-    extraReducers: {
-      [initalizeFeed.pending]: (state, action) => {
-        state.feeds = []
-        state.status = "pending";
-      },
-      [initalizeFeed.fulfilled]: (state, action) => {
-        state.feeds = [action.payload];
-      },
-      [fetchFeed.pending]: (state, action) => {
-        state.status = "pending";
-      },
-      [fetchFeed.fulfilled]: (state, action) => {
-        state.feeds = state.feeds.concat(action.payload);
-      }
+  },
+  extraReducers: {
+    [initalizeFeed.pending]: (state, action) => {
+      state.feeds = [];
+      state.status = "pending";
     },
+    [initalizeFeed.fulfilled]: (state, action) => {
+      state.feeds = [action.payload];
+    },
+    [fetchFeed.pending]: (state, action) => {
+      state.status = "pending";
+    },
+    [fetchFeed.fulfilled]: (state, action) => {
+      state.feeds = state.feeds.concat(action.payload);
+    },
+  },
 });
 
 export const { feedLoadedChangeStatus } = feedsSlice.actions;

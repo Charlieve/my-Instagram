@@ -1,4 +1,5 @@
-import React, { useState, useEffect} from "react";
+import GLOBAL from "../GLOBAL.json";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Text,
@@ -16,9 +17,9 @@ import Icon from "react-native-vector-icons/Ionicons";
 import DemoJSON from "../demo/explorer/explorer01.json";
 import axios from "axios";
 import { BlurView } from "expo-blur";
-import PostThumbnail from "./PostThumbnail"
-import PostsDetailScreen from "./PostsDetailScreen"
-import OtherUserProfileScreen from "./OtherUserProfileScreen"
+import PostThumbnail from "./PostThumbnail";
+import PostsDetailScreen from "./PostsDetailScreen";
+import OtherUserProfileScreen from "./OtherUserProfileScreen";
 import createStyles from "../styles/styles";
 
 const Stack = createStackNavigator();
@@ -32,7 +33,7 @@ const FeedStyles = StyleSheet.create({
     flexDirection: "column",
     flexWrap: "wrap",
     alignContent: "space-between",
-    marginBottom: 0.5
+    marginBottom: 0.5,
   },
   feedRowBig: {
     width: "100%",
@@ -65,21 +66,36 @@ function Feeds({ feedsData, navigation }) {
 }
 
 function FeedRow({ feedsRowData, navigation }) {
-  const [componentWidth,setComponentWidth] = useState(Math.min(800,Dimensions.get('window').width))
+  const [componentWidth, setComponentWidth] = useState(
+    Math.min(800, Dimensions.get("window").width)
+  );
   return (
     <View
-      style={[FeedStyles.feedRow,
+      style={[
+        FeedStyles.feedRow,
         feedsRowData[0].firstFeedType === "image"
-          ? {height: componentWidth/3}
-          : {height: componentWidth/3*2}
-        ]}
-        onLayout={(event) => {
-          setComponentWidth(event.nativeEvent.layout.width)
-        }}
+          ? { height: componentWidth / 3 }
+          : { height: (componentWidth / 3) * 2 },
+      ]}
+      onLayout={(event) => {
+        setComponentWidth(event.nativeEvent.layout.width);
+      }}
     >
-      <FeedComponent feedData={feedsRowData[0]} navigation={navigation} componentWidth={componentWidth}/>
-      <FeedComponent feedData={feedsRowData[1]} navigation={navigation} componentWidth={componentWidth} />
-      <FeedComponent feedData={feedsRowData[2]} navigation={navigation} componentWidth={componentWidth} />
+      <FeedComponent
+        feedData={feedsRowData[0]}
+        navigation={navigation}
+        componentWidth={componentWidth}
+      />
+      <FeedComponent
+        feedData={feedsRowData[1]}
+        navigation={navigation}
+        componentWidth={componentWidth}
+      />
+      <FeedComponent
+        feedData={feedsRowData[2]}
+        navigation={navigation}
+        componentWidth={componentWidth}
+      />
     </View>
   );
 }
@@ -89,10 +105,14 @@ function FeedComponent({ feedData, navigation, componentWidth }) {
     <PostThumbnail
       postId={feedData.postId}
       authorId={feedData.postByUserId}
-      style = {[FeedStyles.feedComponent,
+      style={[
+        FeedStyles.feedComponent,
         feedData.firstFeedType === "image"
-          ? {width: componentWidth/3 -1,height: componentWidth/3 -1}
-          : {width: componentWidth/3*2 -1 ,height: componentWidth/3*2 -1}
+          ? { width: componentWidth / 3 - 1, height: componentWidth / 3 - 1 }
+          : {
+              width: (componentWidth / 3) * 2 - 1,
+              height: (componentWidth / 3) * 2 - 1,
+            },
       ]}
     />
   );
@@ -101,25 +121,25 @@ function FeedComponent({ feedData, navigation, componentWidth }) {
 function ExplorerScreen({ navigation }) {
   const [data, setData] = useState([]);
   const onEndReachedAction = async () => {
-    const fetchData = (await axios.get("http://192.168.3.20:3000/api/explore"))
-      .data;
+    const fetchData = (await axios.get(GLOBAL.SERVERIP + "/api/explore")).data;
     setData([...data, fetchData]);
   };
   useEffect(() => {
-    if(data.length===0){
+    if (data.length === 0) {
       (async () => {
-        const fetchData = (await axios.get("http://192.168.3.20:3000/api/explore"))
+        const fetchData = (await axios.get(GLOBAL.SERVERIP + "/api/explore"))
           .data;
         setData([fetchData]);
-      })()
+      })();
     }
-  },[data])
+  }, [data]);
   return (
     <FlatList
       data={data}
       renderItem={({ item }) => (
         <Feeds feedsData={item} navigation={navigation} />
       )}
+      keyExtractor={(item, index) => "FeedGrid" + index}
       initialNumToRender={1}
       onEndReachedThreshold={0.5}
       onEndReached={() => {
@@ -151,9 +171,9 @@ export default function ExplorerStackScreen() {
         options={({ navigation, route }) => ({
           headerShown: true,
           headerTitle: route.params.userId,
-          headerTitleAlign: 'center',
-          headerTitleStyle: { fontSize: 14},
-          headerStyle: { height: 60 },
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 14 },
+          headerStyle: { height: 64 },
           headerLeft: () => (
             <Icon
               onPress={() => navigation.goBack()}
@@ -164,22 +184,22 @@ export default function ExplorerStackScreen() {
           ),
         })}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="ExplorePostsDetailScreen"
         component={PostsDetailScreen}
         options={({ navigation }) => ({
           headerShown: false,
-          cardStyle: { backgroundColor: 'rgba(0, 0, 0,0.5)' },
+          cardStyle: { backgroundColor: "rgba(0, 0, 0,0.5)" },
           presentation: "transparentModal",
-          gestureEnabled:false,
+          gestureEnabled: false,
           transitionSpec: {
             open: {
               animation: "timing",
-              config: { duration: 100, easing: Easing.bezier(0,.68,1,1) },
+              config: { duration: 100, easing: Easing.bezier(0, 0.68, 1, 1) },
             },
             close: {
               animation: "timing",
-              config: { duration: 100, easing: Easing.bezier(1,.02,1,.3) },
+              config: { duration: 100, easing: Easing.bezier(1, 0.02, 1, 0.3) },
             },
           },
           headerRight: ({ color }) => (

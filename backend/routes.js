@@ -1,9 +1,16 @@
+require('dotenv').config();
 const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const sharp = require("sharp");
 const axios = require("axios");
 const { nanoid } = require("nanoid");
 const multer = require("multer");
+
+
+const UNSPLASH_ACCESSKEY = process.env.UNSPLASH_ACCESSKEY;
+
+
+
 
 module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
   const postContentUpload = multer({
@@ -113,7 +120,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       ).data;
       const unplashImagesData = (
         await axios.get(
-          "https://api.unsplash.com/photos/random/?client_id=-wzE0BIzONiuaXjvyLXnad4JXDvshui_8IK_UNnwuxA&query=portrait&count=" +
+          "https://api.unsplash.com/photos/random/?client_id="+ UNSPLASH_ACCESSKEY +"&query=portrait&count=" +
             String(qty)
         )
       ).data;
@@ -163,15 +170,16 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
   app.route("/addnewposts").post(async (req, res, next) => {
     try {
       const qty = req.body.qty > 10 ? 10 : req.body.qty;
-      const quotes=[]
+      const quotes = [];
       for (let i = 0; i < qty; i++) {
-        console.log('a')
-        await axios.get(
-          "http://metaphorpsum.com/paragraphs/" +
-            String(Math.round(Math.random() * 3) + 1) +
-            "/" +
-            String(Math.round(Math.random() * 5) + 1)
-        ).then(res=>quotes.push(res.data));
+        await axios
+          .get(
+            "http://metaphorpsum.com/paragraphs/" +
+              String(Math.round(Math.random() * 3) + 1) +
+              "/" +
+              String(Math.round(Math.random() * 5) + 1)
+          )
+          .then((res) => quotes.push(res.data));
       }
       const imagePaths = (
         await axios.get(
@@ -181,7 +189,9 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       ).data;
       const title = [];
       for (let [index, dataObj] of quotes.entries()) {
-        title.push(dataObj+'\n\n#unsplash.com'+' #'+imagePaths[index].user.username);
+        title.push(
+          dataObj + "\n\n#unsplash.com" + " #" + imagePaths[index].user.username
+        );
       }
       const images = [];
       for (let [index, dataObj] of imagePaths.entries()) {
@@ -293,14 +303,13 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
 
   //GET BOTS
   app.route("/api/bots").get(async (req, res) => {
-    try{
+    try {
       const bots = await findUsers({ userType: "bot" }, { _id: 0, userId: 1 });
-      res.send(bots)
-    }catch (error) {
+      res.send(bots);
+    } catch (error) {
       res.send(error);
     }
-  })
-
+  });
 
   //GET USER
 
@@ -318,6 +327,8 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           followerQty: 1,
           followingQty: 1,
           posts: 1,
+          followers: 1,
+          followings: 1,
         },
       });
       res.send(userData);
@@ -480,6 +491,50 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           $inc: { likeQty: -1 },
         });
         res.send("unliked");
+      }
+    } catch (err) {
+      res.status(400);
+      res.send(err);
+    }
+  });
+
+  //FOLLOW ACTION
+
+  app.route("/api/follow/:userid").post(async function (req, res) {
+    try {
+      if (
+        !req.body.userId ||
+        !req.params.userid ||
+        req.params.userid === req.body.userId
+      ) {
+        reject("Invalid User ID");
+      }
+      const userId = req.body.userId;
+      const targetId = req.params.userid;
+      const userFollowingArr = (
+        await findUserById(userId, { projection: { _id: 0, followings: 1 } })
+      ).followings;
+      console.log(userFollowingArr);
+      if (!userFollowingArr.includes(targetId)) {
+        await findUserAndUpdate(targetId, {
+          $push: { followers: userId },
+          $inc: { followerQty: 1 },
+        });
+        await findUserAndUpdate(userId, {
+          $push: { followings: targetId },
+          $inc: { followingQty: 1 },
+        });
+        res.send({ targetId: targetId, status: "followed" });
+      } else {
+        await findUserAndUpdate(targetId, {
+          $pull: { followers: userId },
+          $inc: { followerQty: -1 },
+        });
+        await findUserAndUpdate(userId, {
+          $pull: { followings: targetId },
+          $inc: { followingQty: -1 },
+        });
+        res.send({ targetId: targetId, status: "unfollowed" });
       }
     } catch (err) {
       res.status(400);

@@ -1,3 +1,4 @@
+import GLOBAL from '../GLOBAL.json'
 import React from "react";
 import { Button, Text, View, Image, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
@@ -13,8 +14,8 @@ import {
     selectUserFollowerQty,
     selectUserFollowingQty,
     selectUserPosts,
-    //selectUserFollowers,
-    //selectUserFollowings
+    selectUserFollowers,
+    selectUserFollowings
   } from "../features/user/userSlice";
   
 
@@ -29,16 +30,8 @@ export default function ProfileScreen({ navigation }) {
     const userFollowerQty = useSelector(selectUserFollowerQty);
     const userFollowingQty = useSelector(selectUserFollowingQty);
     const userPosts = useSelector(selectUserPosts);
-    //const userFollowers = useSelector(selectUserFollowers);
-    //const userFollowings = useSelector(selectUserFollowings);
-    const userPostsArr = [];
-    for (let [index, data] of [...userPosts].reverse().entries()) {
-      userPostsArr[Math.floor(index / (3 * 1))] || userPostsArr.push([]);
-      userPostsArr[Math.floor(index / (3 * 1))].push({authorId:userId,postId:data});
-    }
-    while(userPostsArr[userPostsArr.length-1].length %3 !==0){
-      userPostsArr[userPostsArr.length-1].push('')
-    }
+    const userFollowers = useSelector(selectUserFollowers);
+    const userFollowings = useSelector(selectUserFollowings);
     return (
       <View style={styles.css.profileBody}>
         <View style={styles.css.userInformation}>
@@ -46,7 +39,7 @@ export default function ProfileScreen({ navigation }) {
             <Image
               style={styles.css.userImage}
               source={{
-                uri: "http://192.168.3.20:3000/users/" + userId + '/userimage.png',
+                uri: GLOBAL.SERVERIP + "/users/" + userId + '/userimage.png',
               }}
             />
             <View style={styles.css.userInformationQtys}>
@@ -94,7 +87,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </View>
         </View>
-        <ProfilePosts postsArr={userPostsArr} navigation={navigation} />
+        <ProfilePosts userPosts={userPosts} navigation={navigation} userId={userId} />
       </View>
     );
   }

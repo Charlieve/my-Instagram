@@ -1,7 +1,9 @@
+import GLOBAL from "../GLOBAL.json";
 import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { feedLoadedChangeStatus } from "../features/feeds/feedsSlice";
+import { followUser } from "../features/user/userSlice";
 import DoubleTapComponent from "../functionComponents/DoubleTapComponent";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
@@ -10,53 +12,91 @@ import createStyles from "../styles/styles";
 import LoadingSpinner from "./LoadingSpinner";
 import TimeAgo from "./TimeAgo";
 
-import { useSelector } from "react-redux";
-import { selectUserId } from "../features/user/userSlice";
+import { selectUserId, selectUserFollowings } from "../features/user/userSlice";
 import { useNavigation } from "@react-navigation/native";
+
+import LikeEffect from "./LikeEffect";
 
 export function FeedHeader({
   navigation,
+  userId,
   postAuthor,
   location,
   postAuthorType,
-  currentStack
+  currentStack,
 }) {
   const styles = createStyles();
+  const dispatch = useDispatch();
+  const userFollowings = useSelector(selectUserFollowings);
+  const isFollowed = userFollowings.includes(postAuthor);
   return (
     <View style={styles.css.feedHeaderContainer}>
       <View style={styles.css.feedHeaderAuthorContainer}>
         <TouchableOpacity
           onPress={() =>
-            navigation.push(
-              currentStack + "OtherUserProfileScreen", { userId: postAuthor })
+            navigation.push(currentStack + "OtherUserProfileScreen", {
+              userId: postAuthor,
+            })
           }
         >
           <Image
             style={{ height: "100%", aspectRatio: 1, borderRadius: 50 }}
             source={{
-              uri: `http://192.168.3.20:3000/users/${postAuthor}/userimage.png`,
+              uri: `${GLOBAL.SERVERIP}/users/${postAuthor}/userimage.png`,
             }}
           />
         </TouchableOpacity>
         <View style={styles.css.feedHeaderAuthor}>
-          <TouchableOpacity
-            style={{ flexDirection: "row" }}
-            onPress={() =>
-              navigation.push(currentStack + "OtherUserProfileScreen", {
-                userId: postAuthor,
-              })
-            }
-          >
-            <Text style={styles.css.boldFont}>{postAuthor}</Text>
-            {postAuthorType === "bot" && (
-              <Icon
-                name="logo-android"
-                color={styles.colors.primary}
-                size={14}
-                style={{ marginLeft: 6 }}
-              />
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginRight: 6,
+              }}
+              onPress={() =>
+                navigation.push(currentStack + "OtherUserProfileScreen", {
+                  userId: postAuthor,
+                })
+              }
+            >
+              <Text style={styles.css.boldFont}>
+                {postAuthor.replace(/(.{20})(.*)/, "$1...")}
+              </Text>
+              {postAuthorType === "bot" && (
+                <Icon
+                  name="logo-android"
+                  color={styles.colors.primary}
+                  size={14}
+                  style={{ marginLeft: 6 }}
+                />
+              )}
+            </TouchableOpacity>
+            {postAuthor !== userId && (
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Icon name="ellipse" size={3.7} color={styles.colors.text} />
+                <TouchableOpacity
+                  style={{ marginLeft: 10 }}
+                  onPress={() => dispatch(followUser(postAuthor))}
+                >
+                  {isFollowed ? (
+                    <Text
+                      style={[
+                        styles.css.subFont,
+                        { fontSize: 15, fontWeight: "600" },
+                      ]}
+                    >
+                      Following
+                    </Text>
+                  ) : (
+                    <Text style={[styles.css.hrefBoldFont, { fontSize: 15 }]}>
+                      Follow
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             )}
-          </TouchableOpacity>
+          </View>
           {location === "" || (
             <Text style={{ fontSize: 12, color: styles.colors.text }}>
               {location}
@@ -89,7 +129,8 @@ export function FeedImage({
   const styles = createStyles();
   const imageSrc = imageData
     ? "data:image/png;base64," + imageData
-    : `http://192.168.3.20:3000/post/${postId}/content.jpeg`;
+    : `${GLOBAL.SERVERIP}/post/${postId}/content.jpeg`;
+  const [click, setClick] = useState(0);
   return (
     <View
       style={{
@@ -98,23 +139,27 @@ export function FeedImage({
     >
       <DoubleTapComponent
         doubleTap={() => {
-          (async () => {
-            axios({
-              method: "post",
-              headers: {
-                "content-type": "application/json",
-                Accept: "application/json",
-              },
-              url: "http://192.168.3.20:3000/api/like/" + postId,
-              data: { userId },
-            });
-          })();
-          setIsLiked(!isLiked);
-          setlikeQty(likeQty + (isLiked ? -1 : 1));
+          setClick(click + 1);
+          if (!isLiked) {
+            (async () => {
+              axios({
+                method: "post",
+                headers: {
+                  "content-type": "application/json",
+                  Accept: "application/json",
+                },
+                url: GLOBAL.SERVERIP + "/api/like/" + postId,
+                data: { userId },
+              });
+            })();
+            setIsLiked(!isLiked);
+            setlikeQty(likeQty + (isLiked ? -1 : 1));
+          }
         }}
         style={{ flex: 1 }}
       >
         <Image style={{ flex: 1 }} source={{ uri: imageSrc }} />
+        <LikeEffect click={click} />
       </DoubleTapComponent>
     </View>
   );
@@ -134,7 +179,7 @@ export function FeedContent({
   setHighlightComment,
   postDate,
   commentQty,
-  currentStack
+  currentStack,
 }) {
   const styles = createStyles();
   return (
@@ -276,9 +321,9 @@ export function FeedContent({
   );
 }
 
-function ContentProcessor({content}) {
+function ContentProcessor({ content }) {
   const styles = createStyles();
-  let fullContent = content.match(/[^\s]+|\n/g)||[];
+  let fullContent = content.match(/[^\s]+|\n/g) || [];
   const regex = new RegExp("^[#@].+");
   fullContent.forEach((string, index) => {
     if (regex.test(string)) {
@@ -340,7 +385,7 @@ function LikeComponent({
               "content-type": "application/json",
               Accept: "application/json",
             },
-            url: "http://192.168.3.20:3000/api/like/" + postId,
+            url: GLOBAL.SERVERIP + "/api/like/" + postId,
             data: { userId },
           });
         })();
@@ -357,7 +402,9 @@ function LikeComponent({
 
 export default function Feed({ postId }) {
   const navigation = useNavigation();
-  const currentStack = navigation.getState().routeNames[0].replace("Screen", "");
+  const currentStack = navigation
+    .getState()
+    .routeNames[0].replace("Screen", "");
   const userId = useSelector(selectUserId);
   const styles = createStyles();
   let feed = DemoJSON;
@@ -382,14 +429,12 @@ export default function Feed({ postId }) {
       setStatus("loading");
       (async () => {
         feed = (
-          await axios.get("http://192.168.3.20:3000/api/post/" + postId, {
+          await axios.get(GLOBAL.SERVERIP + "/api/post/" + postId, {
             params: { userid: userId },
           })
         ).data;
         const author = (
-          await axios.get(
-            "http://192.168.3.20:3000/api/user/" + feed.postByUserId
-          )
+          await axios.get(GLOBAL.SERVERIP + "/api/user/" + feed.postByUserId)
         ).data;
         setPostAuthor(author.userId);
         setPostAuthorType(author.userType);
@@ -408,6 +453,7 @@ export default function Feed({ postId }) {
     return (
       <View style={styles.css.feedContainer}>
         <FeedHeader
+          userId={userId}
           postAuthor={postAuthor}
           postAuthorType={postAuthorType}
           location={location}

@@ -1,3 +1,4 @@
+import GLOBAL from "../GLOBAL.json";
 import React, { useState, useRef, useEffect } from "react";
 import {
   FlatList,
@@ -77,7 +78,7 @@ export default function ModalStackScreen({ navigation }) {
               borderRadius: 50,
             }}
             source={{
-              uri: `http://192.168.3.20:3000/users/${item.id}/userimage.png`,
+              uri: `${GLOBAL.SERVERIP}/users/${item.id}/userimage.png`,
             }}
           />
         </View>
@@ -93,7 +94,7 @@ export default function ModalStackScreen({ navigation }) {
     }).start();
     console.log(bottomSheet.y);
     (async () => {
-      const getBots = await axios.get("http://192.168.3.20:3000/api/bots");
+      const getBots = await axios.get(GLOBAL.SERVERIP + "/api/bots");
       const botsArr = [];
       for (let bot of getBots.data) {
         botsArr.push({ id: bot.userId });
@@ -157,7 +158,7 @@ export default function ModalStackScreen({ navigation }) {
           style={{
             width: "100%",
             overflow: "hidden",
-            marginTop:10,
+            marginTop: 10,
             marginBottom: 10,
           }}
         >

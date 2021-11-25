@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function HomeTabs({ navigation }) {
+function HomeTabs() {
   const { colors } = useTheme();
   return (
     <Tab.Navigator
@@ -196,7 +196,7 @@ function App1() {
         <View style={{ flex: 1, maxWidth: 800 }}>
             <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
               <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen key="Asad" name="App" component={HomeTabs} />
+                <Stack.Screen key="mainPage" name="App" component={HomeTabs} />
                 <Stack.Screen
                   name="Chat"
                   component={ChatStackScreen}

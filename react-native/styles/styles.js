@@ -137,10 +137,22 @@ export default function createStyles() {
       borderRadius: 5,
       borderColor: "#dfdfdf",
       margin: 2,
-      padding: 8,
+      padding: 10,
       alignItems: "center",
       marginTop: 8,
       marginBottom: 8,
+    },
+    userActionComponentActivated: {
+      flex: 1,
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderRadius: 5,
+      margin: 2,
+      padding: 10,
+      alignItems: "center",
+      marginTop: 8,
+      marginBottom: 8,
+      backgroundColor: colors.primary
     },
     informationQty: {
       fontSize: 18,
