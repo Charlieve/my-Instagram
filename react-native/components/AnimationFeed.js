@@ -138,8 +138,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
             width: (windowWidth / 3) * 2.6,
             height: (windowWidth / 3) * 2.6 + 50,
             position: "absolute",
-            top: measure.y,
-            left: measure.x,
+            top: 40,
+            left: (windowWidth / 3) * 0.2,
             overflow: "hidden",
           },
           {
@@ -154,8 +154,9 @@ export default function AnimationFeedScreen({ navigation, route }) {
                     inputRange: [-1, 0, 1],
                     outputRange: [
                       -(windowWidth / 3) * 0.8 - 35,
-                      -(windowWidth / 3) * 0.8 - 35,
-                      offsetY,
+                      -(((windowWidth / 3) * 2.6 - measure.width + 150) / 2) +
+                        measure.y + ((1- measure.width*3/windowWidth)*10),
+                      0,
                     ],
                   }),
                   Animated.multiply(progress, panValue.y).interpolate({
@@ -169,9 +170,9 @@ export default function AnimationFeedScreen({ navigation, route }) {
                   progress.interpolate({
                     inputRange: [-1, 0, 1],
                     outputRange: [
-                      -(windowWidth / 3) * 0.8,
-                      -(windowWidth / 3) * 0.8,
-                      offsetX,
+                      measure.x + measure.width / 2 - windowWidth / 2,
+                      measure.x + measure.width / 2 - windowWidth / 2,
+                      0,
                     ],
                   }),
                   Animated.multiply(progress, panValue.x).interpolate({
@@ -184,7 +185,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
                 scale: Animated.add(
                   progress.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [1 / 2.6, 1],
+                    // outputRange: [1, 1],
+                    outputRange: [measure.width / (windowWidth / 3) / 2.6, 1],
                   }),
                   Animated.multiply(progress, panValue.y).interpolate({
                     inputRange: [-300, -200, -100, 0, 100],
