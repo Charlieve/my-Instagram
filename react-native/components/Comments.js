@@ -12,16 +12,12 @@ import {
 import DoubleTapComponent from "../functionComponents/DoubleTapComponent";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
-import LoadingSpinner from "./LoadingSpinner";
 import createStyles from "../styles/styles";
-import CommentInput from "./CommentInput";
 import ContentProcessor from "./ContentProcessor";
 import TimeAgo from "./TimeAgo";
 
-import { useSelector } from "react-redux";
-import { selectUserId } from "../features/user/userSlice";
 
-import { CommentContext } from "./CommentsProvider";
+import { CommentContext } from "./CommentContext";
 
 function AllCommentsComponent({ AllcommentsData, postId }) {
   return (
@@ -196,98 +192,42 @@ export default function CommentsStackScreen({ navigation, postId }) {
   const styles = createStyles();
   const {
     postData,
-    setPostData,
     comments,
-    setComments,
-    replyTo,
-    setReplyTo,
-    inputContent,
-    onChangeText,
   } = useContext(CommentContext);
-  const userId = useSelector(selectUserId);
   const postAuthor = postData?.postByUserId;
   const postDate = postData?.date;
   const topic = postData?.topic;
-  useEffect(() => {
-    let isMount = true;
-    (async () => {
-      const data = (
-        await axios.get(GLOBAL.SERVERIP + "/post/" + postId + "/comments", {
-          params: { userid: userId },
-        })
-      ).data;
-      const comments = data.comments;
-      comments.map((comment, index) => {
-        comments[index] = {
-          ...comments[index],
-          isLiked: comment.likesByUserId.includes(userId),
-        };
-      });
-      setTimeout(() => {
-        if (isMount) {
-          setPostData({ status: "succeeded", ...data });
-          setComments(comments);
-        }
-      }, 1000);
-    })();
-    return () => {
-      isMount = false;
-    };
-  }, [postId]);
-  if (postData.status === "idle") {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <LoadingSpinner />
-      </View>
-    );
-  } else {
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={64}
-        style={{ flex: 1 }}
-      >
-        <View style={{ flex: 1, justifyContent: "space-around" }}>
-          <ScrollView style={{ flex: 1 }}>
-            <View style={styles.css.commentsBody}>
-              <View style={styles.css.topic}>
-                <View style={styles.css.commentLeft}>
-                  <Image
-                    style={styles.css.commentUserImage}
-                    source={{
-                      uri: `${GLOBAL.SERVERIP}/users/${postAuthor}/userimage.png`,
-                    }}
-                  />
-                </View>
-                <View style={styles.css.commentRight}>
-                  <Text style={[styles.css.normalFont, { marginBottom: 10 }]}>
-                    <Text style={styles.css.boldFont}>{postAuthor}</Text>{" "}
-                    <ContentProcessor content={topic} />
-                  </Text>
-                  <TimeAgo
-                    style={styles.css.postDateFont}
-                    timestamp={postDate}
-                  />
-                </View>
-              </View>
-              <View
-                style={{
-                  borderBottomColor: styles.colors.border,
-                  borderBottomWidth: 1,
-                  marginBottom: 16,
-                }}
-              />
-              <View>
-                <AllCommentsComponent
-                  AllcommentsData={comments}
-                  postId={postId}
-                />
-              </View>
-            </View>
-          </ScrollView>
-          <CommentInput postId={postId} />
+  return (
+    <ScrollView style={{ flex: 1 }}>
+      <View style={styles.css.commentsBody}>
+        <View style={styles.css.topic}>
+          <View style={styles.css.commentLeft}>
+            <Image
+              style={styles.css.commentUserImage}
+              source={{
+                uri: `${GLOBAL.SERVERIP}/users/${postAuthor}/userimage.png`,
+              }}
+            />
+          </View>
+          <View style={styles.css.commentRight}>
+            <Text style={[styles.css.normalFont, { marginBottom: 10 }]}>
+              <Text style={styles.css.boldFont}>{postAuthor}</Text>{" "}
+              <ContentProcessor content={topic} />
+            </Text>
+            <TimeAgo style={styles.css.postDateFont} timestamp={postDate} />
+          </View>
         </View>
-      </KeyboardAvoidingView>
-    );
-  }
+        <View
+          style={{
+            borderBottomColor: styles.colors.border,
+            borderBottomWidth: 1,
+            marginBottom: 16,
+          }}
+        />
+        <View>
+          <AllCommentsComponent AllcommentsData={comments} postId={postId} />
+        </View>
+      </View>
+    </ScrollView>
+  );
 }
