@@ -6,6 +6,7 @@ import ProfileScreen from "./ProfileScreen";
 import PostsDetailScreen from "./PostsDetailScreen";
 import createStyles from "../styles/styles";
 import OtherUserProfileScreen from "./OtherUserProfileScreen";
+import FollowTab from "./FollowTab";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
@@ -105,6 +106,25 @@ export default function ProfileStackScreen({ user }) {
               name="chatbubble-ellipses-outline"
               color={color}
               size={28}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name='FollowTab'
+        component={FollowTab}
+        options={({ navigation, route }) => ({
+          headerShown: true,
+          headerTitle: route.params.userId,
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontSize: 14 },
+          headerStyle: { height: 64 },
+          headerLeft: () => (
+            <Icon
+              onPress={() => navigation.goBack()}
+              name="chevron-back"
+              color={styles.colors.text}
+              size={40}
             />
           ),
         })}
