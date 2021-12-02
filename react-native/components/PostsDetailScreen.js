@@ -18,12 +18,13 @@ import Icon from "react-native-vector-icons/Ionicons";
 export default function PostsDetailScreen({ route }) {
   const navigation = useNavigation();
   const styles = createStyles();
+  const { measure, postData, postId, authorId, previewMeasure } = route.params;
+  const previewMeasureChecked = previewMeasure ? previewMeasure : measure;
   const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height;
   const mainView = useRef(null);
-  const progress = useRef(new Animated.Value(0)).current;
+  const progress = useRef(new Animated.Value(previewMeasure ? 2 : 0)).current;
   const panValue = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const { measure, postData, postId, authorId } = route.params;
   const [startPanning, setStartPanning] = useState(false);
   const [allowPanning, setAllowPanning] = useState(true);
   const [scrollable, setScrollable] = useState(true);
@@ -82,9 +83,9 @@ export default function PostsDetailScreen({ route }) {
   useEffect(() => {
     Animated.timing(progress, {
       toValue: 1,
-      duration: 500,
+      duration: 300,
       useNativeDriver: false,
-      easing: Easing.in(Easing.elastic(0.8)),
+      easing: Easing.quad,
     }).start();
 
     const unsubscribe = navigation.addListener("gestureStart", (e) => {
@@ -109,10 +110,13 @@ export default function PostsDetailScreen({ route }) {
             {
               translateX: Animated.add(
                 progress.interpolate({
-                  inputRange: [0, 1],
+                  inputRange: [0, 1, 2],
                   outputRange: [
                     -windowWidth / 2 + measure.x + measure.width / 2,
                     0,
+                    -windowWidth / 2 +
+                      previewMeasureChecked.x +
+                      previewMeasureChecked.width / 2,
                   ],
                 }),
                 Animated.multiply(progress, panValue.x).interpolate({
@@ -124,7 +128,7 @@ export default function PostsDetailScreen({ route }) {
             {
               translateY: Animated.add(
                 progress.interpolate({
-                  inputRange: [0, 1],
+                  inputRange: [0, 1, 2],
                   outputRange: [
                     measure.y -
                       ((1 - measure.width / windowWidth) * windowHeight) / 2 +
@@ -132,6 +136,15 @@ export default function PostsDetailScreen({ route }) {
                       ((2 / 3 - measure.width / windowWidth) * measure.width) /
                         6,
                     0,
+                    previewMeasureChecked.y -
+                      ((1 - previewMeasureChecked.width / windowWidth) *
+                        windowHeight) /
+                        2 +
+                      10 +
+                      ((2 / 3 - previewMeasureChecked.width / windowWidth) *
+                        previewMeasureChecked.width) /
+                        6 +
+                      60,
                   ],
                 }),
                 Animated.multiply(progress, panValue.y).interpolate({
@@ -143,8 +156,12 @@ export default function PostsDetailScreen({ route }) {
             {
               scale: Animated.add(
                 progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [measure.width / windowWidth, 1],
+                  inputRange: [0, 1, 2],
+                  outputRange: [
+                    measure.width / windowWidth,
+                    1,
+                    previewMeasureChecked.width / windowWidth,
+                  ],
                 }),
                 Animated.multiply(progress, panValue.x).interpolate({
                   inputRange: [-1, 0, 100, 500],
@@ -176,10 +193,11 @@ export default function PostsDetailScreen({ route }) {
             )
           ),
           height: progress.interpolate({
-            inputRange: [0, 1],
+            inputRange: [0, 1, 2],
             outputRange: [
               (windowWidth / (windowHeight - 38)) * 100 + "%",
               "100%",
+              (windowWidth / (windowHeight - 38)) * 100 + "%",
             ],
           }),
           overflow: "hidden",
@@ -188,8 +206,8 @@ export default function PostsDetailScreen({ route }) {
         <Animated.View
           style={{
             marginTop: progress.interpolate({
-              inputRange: [0, 1],
-              outputRange: [-130, 0],
+              inputRange: [0, 1, 2],
+              outputRange: [-130, 0, -130],
             }),
           }}
         />

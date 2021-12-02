@@ -5,7 +5,7 @@ import createStyles from "../styles/styles";
 
 const LoadingEffect = ({ style }) => {
   const progress = useRef(new Animated.Value(0)).current;
-  const windowWidth = Dimensions.get("window").width;
+  const windowWidth = Dimensions.get("window").width > 800 ? 800 : Dimensions.get("window").width;
   const styles = createStyles();
   Animated.loop(
     Animated.timing(progress, {

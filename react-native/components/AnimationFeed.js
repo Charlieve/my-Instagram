@@ -26,8 +26,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
   const windowWidth =
     Dimensions.get("window").width > 800 ? 800 : Dimensions.get("window").width;
   const { measure, postData, postId, authorId, currentStack } = route.params;
-  const offsetX = (windowWidth / 3) * 0.2 - measure.x;
-  const offsetY = 40 - measure.y;
+
+  const mainImage = useRef(null);
 
   const imageSrc = postData
     ? "data:image/png;base64," + postData
@@ -155,7 +155,8 @@ export default function AnimationFeedScreen({ navigation, route }) {
                     outputRange: [
                       -(windowWidth / 3) * 0.8 - 35,
                       -(((windowWidth / 3) * 2.6 - measure.width + 150) / 2) +
-                        measure.y + ((1- measure.width*3/windowWidth)*10),
+                        measure.y +
+                        (1 - (measure.width * 3) / windowWidth) * 10,
                       0,
                     ],
                   }),
@@ -200,14 +201,19 @@ export default function AnimationFeedScreen({ navigation, route }) {
         {...panValueResponder.panHandlers}
       >
         <Pressable
+          ref={mainImage}
           style={{ height: "100%" }}
           onPress={() => {
-            navigation.goBack();
-            navigation.push(currentStack + "PostsDetailScreen", {
-              measure,
-              postData,
-              postId,
-              authorId,
+            mainImage.current.measureInWindow((x, y, width, height) => {
+              const previewMeasure = { x, y, width, height };
+              navigation.goBack();
+              navigation.push(currentStack + "PostsDetailScreen", {
+                measure,
+                postData,
+                postId,
+                authorId,
+                previewMeasure
+              });
             });
           }}
         >
