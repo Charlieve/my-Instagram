@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 
 import LikeEffect from "./LikeEffect";
 
+import LoadingText from "./LoadingText";
+
 export function FeedHeader({
   navigation,
   userId,
@@ -238,84 +240,98 @@ export function FeedContent({
             <Text style={styles.css.boldFont}>{likeQty} likes</Text>
           )}
         </View>
-        <View>
-          <View style={styles.css.marginBottom}>
-            <Text style={styles.css.normalFont}>
-              <Text
-                style={styles.css.boldFont}
-                onPress={() =>
-                  navigation.push(currentStack + "OtherUserProfileScreen", {
-                    userId: postAuthor,
-                  })
-                }
-              >
-                {postAuthor}
-              </Text>{" "}
-              {topic && <ContentProcessor content={topic} />}
-            </Text>
-          </View>
+        {topic ? (
           <View>
             <View style={styles.css.marginBottom}>
-              {commentQty > 0 && (
-                <View>
-                  <Text
-                    onPress={() => navigation.navigate("Comments", { postId })}
-                    style={styles.css.subFont}
-                  >
-                    View {commentQty > 1 && "all "}
-                    {commentQty} comment{commentQty > 1 && "s"}
-                  </Text>
-                </View>
-              )}
-            </View>
-            {highlightComment.map((comment, index) => {
-              return (
-                <View
-                  key={index}
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignContent: "space-between",
-                    alignItems: "center",
-                  }}
+              <Text style={styles.css.normalFont}>
+                <Text
+                  style={styles.css.boldFont}
+                  onPress={() =>
+                    navigation.push(currentStack + "OtherUserProfileScreen", {
+                      userId: postAuthor,
+                    })
+                  }
                 >
-                  <View style={{ ...styles.css.marginBottom, flex: 1 }}>
-                    <Text style={styles.css.normalFont}>
-                      <Text style={styles.css.boldFont}>{comment.author}</Text>{" "}
-                      {comment.content}
+                  {postAuthor}
+                </Text>{" "}
+                {topic && <ContentProcessor content={topic} />}
+              </Text>
+            </View>
+            <View>
+              <View style={styles.css.marginBottom}>
+                {commentQty > 0 && (
+                  <View>
+                    <Text
+                      onPress={() =>
+                        navigation.navigate("Comments", { postId })
+                      }
+                      style={styles.css.subFont}
+                    >
+                      View {commentQty > 1 && "all "}
+                      {commentQty} comment{commentQty > 1 && "s"}
                     </Text>
                   </View>
-                  <Icon
-                    onPress={() =>
-                      setHighlightComment(
-                        [...highlightComment].map(
-                          (stateComment, stateIndex) => {
-                            if (index === stateIndex) {
-                              return {
-                                ...stateComment,
-                                isLiked: !stateComment.isLiked,
-                              };
-                            } else {
-                              return stateComment;
+                )}
+              </View>
+              {highlightComment.map((comment, index) => {
+                return (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View style={{ ...styles.css.marginBottom, flex: 1 }}>
+                      <Text style={styles.css.normalFont}>
+                        <Text style={styles.css.boldFont}>
+                          {comment.author}
+                        </Text>{" "}
+                        {comment.content}
+                      </Text>
+                    </View>
+                    <Icon
+                      onPress={() =>
+                        setHighlightComment(
+                          [...highlightComment].map(
+                            (stateComment, stateIndex) => {
+                              if (index === stateIndex) {
+                                return {
+                                  ...stateComment,
+                                  isLiked: !stateComment.isLiked,
+                                };
+                              } else {
+                                return stateComment;
+                              }
                             }
-                          }
+                          )
                         )
-                      )
-                    }
-                    name={comment.isLiked ? "heart" : "heart-outline"}
-                    color={
-                      comment.isLiked ? styles.colors.like : styles.colors.text
-                    }
-                    size={12}
-                  />
-                </View>
-              );
-            })}
+                      }
+                      name={comment.isLiked ? "heart" : "heart-outline"}
+                      color={
+                        comment.isLiked
+                          ? styles.colors.like
+                          : styles.colors.text
+                      }
+                      size={12}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+            <View style={{ marginBottom: 16 }}>
+              <TimeAgo style={styles.css.postDateFont} timestamp={postDate} />
+            </View>
           </View>
-          <View style={{ marginBottom: 16 }}>
-            <TimeAgo style={styles.css.postDateFont} timestamp={postDate} />
+        ) : (
+          <View>
+            <LoadingText style={{ flex: 1 }} />
+            <LoadingText style={{ width: "90%" }} />
+            <LoadingText style={{ width: "20%", marginTop: 10 }} />
           </View>
-        </View>
+        )}
       </View>
     </View>
   );
