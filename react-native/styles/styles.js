@@ -152,7 +152,8 @@ export default function createStyles() {
       alignItems: "center",
       marginTop: 8,
       marginBottom: 8,
-      backgroundColor: colors.primary
+      backgroundColor: colors.primary,
+      borderWidth: 0,
     },
     informationQty: {
       fontSize: 18,

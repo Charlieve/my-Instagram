@@ -139,7 +139,10 @@ export default function OtherUserProfileScreen({ navigation, route }) {
                       });
                 }}
               >
-                <Text style={styles.css.superBoldFont}>
+                <Text 
+                style={[styles.css.superBoldFont,
+                  isFollowed|| {color:styles.colors.background},
+                ]}>
                   {isFollowed ? "Following" : "Follow"}
                 </Text>
               </TouchableOpacity>
