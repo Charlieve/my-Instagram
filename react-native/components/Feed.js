@@ -9,7 +9,6 @@ import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import DemoJSON from "../demo/feed/feed1.json"; //delete
 import createStyles from "../styles/styles";
-import LoadingSpinner from "./LoadingSpinner";
 import TimeAgo from "./TimeAgo";
 
 import { selectUserId, selectUserFollowings } from "../features/user/userSlice";
@@ -17,6 +16,8 @@ import { useNavigation } from "@react-navigation/native";
 
 import LikeEffect from "./LikeEffect";
 
+import LoadingSpinner from "./LoadingSpinner";
+import LoadingFeed from "./LoadingFeed";
 import LoadingText from "./LoadingText";
 
 export function FeedHeader({
@@ -186,11 +187,7 @@ export function FeedContent({
   const styles = createStyles();
   return (
     <View
-      style={{
-        minHeight: 80,
-        paddingLeft: 16,
-        paddingRight: 16,
-      }}
+      style={styles.css.feedContentContainer}
     >
       <View
         style={{
@@ -460,11 +457,11 @@ export default function Feed({ postId }) {
         setlikeQty(feed.likeQty);
         setIsLiked(feed.isLiked);
         setCommentQty(feed.commentQty);
-        // setTimeout(afterLoadedAction, 1000);
+        //setTimeout(afterLoadedAction, 200000);
         afterLoadedAction();
       })();
     }
-    return <LoadingSpinner />;
+    return <LoadingFeed style={styles.css.feedContainer} />;
   } else {
     return (
       <View style={styles.css.feedContainer}>

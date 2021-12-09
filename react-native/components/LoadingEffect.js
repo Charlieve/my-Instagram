@@ -5,7 +5,8 @@ import createStyles from "../styles/styles";
 
 const LoadingEffect = ({ style }) => {
   const progress = useRef(new Animated.Value(0)).current;
-  const windowWidth = Dimensions.get("window").width > 800 ? 800 : Dimensions.get("window").width;
+  const windowWidth =
+    Dimensions.get("window").width > 800 ? 800 : Dimensions.get("window").width;
   const styles = createStyles();
   Animated.loop(
     Animated.timing(progress, {
@@ -16,12 +17,12 @@ const LoadingEffect = ({ style }) => {
     { iterations: -1 }
   ).start();
   return (
-    <View style={[style, { borderRadius: "50%", overflow: "hidden" }]}>
+    <View style={[{ borderRadius: "50%", overflow: "hidden" }, style]}>
       <View
         style={{
           flex: 1,
           height: "100%",
-          backgroundColor: styles.colors.border,
+          backgroundColor: styles.colors.subButton,
         }}
       />
       <Animated.View
@@ -50,10 +51,10 @@ const LoadingEffect = ({ style }) => {
       >
         <LinearGradient
           colors={[
-            styles.colors.border,
             styles.colors.subButton,
+            styles.colors.popup,
+            styles.colors.popup,
             styles.colors.subButton,
-            styles.colors.border,
           ]}
           locations={[0, 0.4, 0.6, 1]}
           style={{ flex: 1 }}

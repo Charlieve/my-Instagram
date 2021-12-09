@@ -82,13 +82,13 @@ const PostThumbnail = ({ postData, postId, authorId, style }) => {
               useNativeDriver: true,
             }).start();
           }}
-          // onPressOut={() =>
-          //   Animated.timing(press, {
-          //     toValue: 0,
-          //     duration: 200,
-          //     useNativeDriver: true,
-          //   }).start()
-          // }
+          onPressOut={() =>
+            Animated.timing(press, {
+              toValue: 0,
+              duration: 200,
+              useNativeDriver: true,
+            }).start()
+          }
           delayLongPress={300}
           onLongPress={() => {
             Animated.sequence([

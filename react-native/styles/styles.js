@@ -47,15 +47,15 @@ export default function createStyles() {
       width: "100%",
       height: 44,
       backgroundColor: colors.background,
-      borderBottomWidth:1,
+      borderBottomWidth: 1,
       borderBottomColor: colors.border,
       justifyContent: "space-between",
       flexDirection: "row",
     },
-    custumizeHeaderTitle:{
+    custumizeHeaderTitle: {
       color: colors.text,
-      fontWeight:'700',
-      fontSize:20,
+      fontWeight: "700",
+      fontSize: 20,
     },
 
     feedContainer: {
@@ -88,6 +88,11 @@ export default function createStyles() {
       paddingBottom: 10,
       paddingRight: 8,
       justifyContent: "center",
+    },
+    feedContentContainer: {
+      minHeight: 80,
+      paddingLeft: 16,
+      paddingRight: 16,
     },
     profileBody: {
       flex: 1,
