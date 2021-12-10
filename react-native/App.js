@@ -200,18 +200,6 @@ function App1() {
                 <Stack.Screen
                   name="Chat"
                   component={ChatStackScreen}
-                  options={({ navigation }) => ({
-                    headerShown: true,
-                    headerStyle: { height: 64 },
-                    headerLeft: ({ color }) => (
-                      <Icon
-                        onPress={() => navigation.goBack()}
-                        name="chevron-back"
-                        color={color}
-                        size={40}
-                      />
-                    ),
-                  })}
                 />
                 <Stack.Screen
                   name="Comments"

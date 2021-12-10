@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const sharp = require("sharp");
@@ -6,11 +6,7 @@ const axios = require("axios");
 const { nanoid } = require("nanoid");
 const multer = require("multer");
 
-
 const UNSPLASH_ACCESSKEY = process.env.UNSPLASH_ACCESSKEY;
-
-
-
 
 module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
   const postContentUpload = multer({
@@ -120,7 +116,9 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       ).data;
       const unplashImagesData = (
         await axios.get(
-          "https://api.unsplash.com/photos/random/?client_id="+ UNSPLASH_ACCESSKEY +"&query=portrait&count=" +
+          "https://api.unsplash.com/photos/random/?client_id=" +
+            UNSPLASH_ACCESSKEY +
+            "&query=portrait&count=" +
             String(qty)
         )
       ).data;
@@ -334,6 +332,21 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       res.send(userData);
     } catch (err) {
       res.send(err);
+    }
+  });
+
+  //SEARCH USERS
+
+  app.route("/api/search/users/:id").get(async (req, res) => {
+    const searchingId = req.params.id;
+    try {
+      const result = await findUsers(
+        { userId: { $regex: searchingId, $options: "gi"} },
+        { _id: 0, userId: 1 }
+      );
+      res.send(result);
+    } catch (error) {
+      res.send(error);
     }
   });
 

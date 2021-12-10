@@ -42,6 +42,11 @@ export default function createStyles() {
       color: colors.primary,
       fontWeight: "600",
     },
+    headerFont: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.text,
+    },
 
     custumizeHeader: {
       width: "100%",
@@ -321,6 +326,14 @@ export default function createStyles() {
       paddingBottom: 10,
       paddingRight: 20,
       paddingLeft: 20,
+    },
+
+    searchContainer: {
+      backgroundColor: colors.subButton,
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 3,
+      borderRadius: 10,
     },
   });
   const style = { colors, css };

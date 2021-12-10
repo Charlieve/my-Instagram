@@ -141,7 +141,7 @@ export default function OtherUserProfileScreen({ navigation, route }) {
               >
                 <Text 
                 style={[styles.css.superBoldFont,
-                  isFollowed|| {color:styles.colors.background},
+                  isFollowed|| {color:'white'},
                 ]}>
                   {isFollowed ? "Following" : "Follow"}
                 </Text>

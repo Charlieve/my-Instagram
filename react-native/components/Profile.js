@@ -52,15 +52,7 @@ export default function ProfileStackScreen({ user }) {
                 />
               </TouchableOpacity>
             </View>
-          ),
-          headerRight: ({ color }) => (
-            <Icon
-              onPress={() => navigation.push("Chat")}
-              name="chatbubble-ellipses-outline"
-              color={color}
-              size={28}
-            />
-          ),
+          )
         })}
       />
       <Stack.Screen
