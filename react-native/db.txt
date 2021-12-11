@@ -17,6 +17,14 @@ db --
     |   |-followings
     |       |-qty
     |       |-followingsByUserId
+    |   |-message(arr)
+    |       |-userId(s)
+    |       |-messages(arr)
+    |           |-status(sent,seen) (?)
+    |           |-date
+    |           |-seenDate(arr)
+    |           |-contentType(string,image,video,post,user) 
+    |           |-content
     |
     |
     |-posts

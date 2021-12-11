@@ -16,8 +16,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import createStyles from "../styles/styles";
 import axios from "axios";
 
-import { useSelector } from "react-redux";
-import { selectUserId } from "../features/user/userSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { selectUserId, selectUserMessage, createMessage } from "../features/user/userSlice";
 
 const SelectedUserButton = ({ userId, selectUsers, setSelectUsers }) => {
   const styles = createStyles();
@@ -25,7 +25,7 @@ const SelectedUserButton = ({ userId, selectUsers, setSelectUsers }) => {
     <Pressable
       style={{
         backgroundColor: styles.colors.warning,
-        borderRadius: "50%",
+        borderRadius: 50,
         padding: 5,
         paddingLeft: 10,
         paddingRight: 10,
@@ -123,7 +123,6 @@ const ChatNewMessageSearchBar = ({
         horizontal={true}
       /> */}
         {selectUsers.map((item, index) => {
-          console.log(item);
           return (
             <SelectedUserButton
               userId={item}
@@ -210,10 +209,12 @@ const ChatNewMessageSearchResultList = ({
 };
 
 const ChatNewMessage = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const styles = createStyles();
   const [searchUserList, setSearchUserList] = useState([]);
   const [selectUsers, setSelectUsers] = useState([]);
+  const message = useSelector(selectUserMessage);
   return (
     <SafeAreaView style={{ flex: 1, marginTop: 25 }}>
       <View style={[styles.css.custumizeHeader, { alignItems: "center" }]}>
@@ -236,8 +237,22 @@ const ChatNewMessage = () => {
           }}
           disabled={selectUsers.length === 0}
           onPress={() => {
-            navigation.goBack();
-            navigation.push("ChatMessage");
+            if (
+              !!(message.filter(
+                (item) =>
+                  JSON.stringify(item.userId.sort()) ===
+                  JSON.stringify(selectUsers.sort())
+              ).length)
+            ) {
+              //contact already exists
+              navigation.goBack();
+              navigation.push("ChatMessage",{contactId:selectUsers});
+            } else {
+              //need to create contact
+              dispatch(createMessage(selectUsers[0]))
+              navigation.goBack();
+              navigation.push("ChatMessage",{contactId:selectUsers});
+            }
           }}
         >
           <Text

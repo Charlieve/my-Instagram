@@ -327,6 +327,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           posts: 1,
           followers: 1,
           followings: 1,
+          message: 1,
         },
       });
       res.send(userData);
@@ -341,7 +342,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     const searchingId = req.params.id;
     try {
       const result = await findUsers(
-        { userId: { $regex: searchingId, $options: "gi"} },
+        { userId: { $regex: searchingId, $options: "gi" } },
         { _id: 0, userId: 1 }
       );
       res.send(result);
@@ -511,6 +512,73 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
     }
   });
 
+  //CREATE MESSAGE CONTACT
+
+  app.route("/api/message").post(async function (req, res) {
+    try {
+      if (
+        !req.body.userId ||
+        !req.body.targetId ||
+        req.body.targetId === req.body.userId
+      ) {
+        reject("Invalid User ID");
+      }
+      const userId = req.body.userId;
+      const targetId = req.body.targetId;
+      const userContacts = await findUserById(userId, {
+        projection: { _id: 0, message: { userId: 1 } },
+      });
+      if (
+        !userContacts.message || //create "message" field
+        !userContacts.message.filter(
+          (item) => JSON.stringify(item.userId) === `["${targetId}"]`
+        ).length //check if contact exists
+      ) {
+        await findUserAndUpdate(userId, {
+          $push: { message: { userId: [targetId], message: [] } },
+        });
+        res.send({ status: "created contact", userId: [targetId] });
+      } else {
+        res.send("already exists");
+      }
+    } catch (err) {
+      res.status(400);
+      res.send(err);
+    }
+  });
+
+  //DELETE MESSAGE CONTACT
+
+  app.route("/api/deletemessage").post(async function (req, res) {
+    try {
+      if (!req.body.userId || !req.body.targetId) {
+        reject("Invalid User ID");
+      }
+      const userId = req.body.userId;
+      const targetId = req.body.targetId;
+      const userContacts = await findUserById(userId, {
+        projection: { _id: 0, message: { userId: 1 } },
+      });
+      if (
+        !!userContacts.message.filter(
+          (item) =>
+            JSON.stringify(item.userId.sort()) ===
+            JSON.stringify(targetId.sort())
+        ).length //check if contact exists
+      ) {
+        await findUserAndUpdate(userId, {
+          $pull: { message: { userId: targetId } },
+        });
+        res.send({ status: "deleted", userId: targetId });
+      } else {
+        res.send("doesnt exists");
+      }
+    } catch (err) {
+      res.status(400);
+      res.send(err);
+    }
+  });
+
   //FOLLOW ACTION
 
   app.route("/api/follow/:userid").post(async function (req, res) {
@@ -527,7 +595,6 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
       const userFollowingArr = (
         await findUserById(userId, { projection: { _id: 0, followings: 1 } })
       ).followings;
-      console.log(userFollowingArr);
       if (!userFollowingArr.includes(targetId)) {
         await findUserAndUpdate(targetId, {
           $push: { followers: userId },

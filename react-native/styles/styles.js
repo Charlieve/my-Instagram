@@ -63,6 +63,12 @@ export default function createStyles() {
       fontSize: 20,
     },
 
+    custumizeHeaderSmallTitle: {
+      color: colors.text,
+      fontWeight: "700",
+      fontSize: 14,
+    },
+
     feedContainer: {
       width: "100%",
     },

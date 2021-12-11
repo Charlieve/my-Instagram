@@ -18,7 +18,7 @@ const ChatScreen = () => {
       <View
         style={[
           styles.css.custumizeHeader,
-          { borderBottomWidth: 0, alignItems: "center", marginBottom:5 },
+          { borderBottomWidth: 0, alignItems: "center", marginBottom: 5 },
         ]}
       >
         <Icon
@@ -52,7 +52,12 @@ const ChatScreen = () => {
             paddingBottom: 2, //visual center Icon
           }}
         >
-          <Icon name="create-outline" color={styles.colors.text} size={28} onPress={()=>navigation.push('ChatNewMessage')} />
+          <Icon
+            name="create-outline"
+            color={styles.colors.text}
+            size={28}
+            onPress={() => navigation.push("ChatNewMessage")}
+          />
         </TouchableOpacity>
       </View>
       <ChatScreenChatList userId={userId} />
