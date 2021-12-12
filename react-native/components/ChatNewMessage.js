@@ -235,7 +235,7 @@ const ChatNewMessage = () => {
             marginRight: 10,
             paddingBottom: 2, //visual center Icon
           }}
-          disabled={selectUsers.length === 0}
+          disabled={selectUsers.length !== 1} //only private chat now, will develop group chat
           onPress={() => {
             if (
               !!(message.filter(
@@ -261,7 +261,7 @@ const ChatNewMessage = () => {
               {
                 fontWeight: "600",
                 color:
-                  selectUsers.length === 0
+                  selectUsers.length !== 1
                     ? styles.colors.subText
                     : styles.colors.text,
               },

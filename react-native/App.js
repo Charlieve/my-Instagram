@@ -48,6 +48,7 @@ const Theme = {
     popup: "white",
     like: "rgb(237, 73, 86)",
     warning: "#f44",
+    smartButton: '#337bef'
   },
 };
 
@@ -64,6 +65,7 @@ const ThemeDark = {
     subText: "gray",
     like: "rgb(237, 73, 86)",
     warning: "#f44",
+    smartButton: '#337bef'
   },
 };
 

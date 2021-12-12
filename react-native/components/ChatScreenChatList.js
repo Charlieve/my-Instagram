@@ -147,7 +147,7 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
             dispatch(deleteMessage(userId));
           }}
         >
-          <Text style={[styles.css.normalFont, { fontSize: 18 }]}>Delete</Text>
+          <Text style={[styles.css.normalFont, { fontSize: 18, color:'white' }]}>Delete</Text>
         </TouchableOpacity>
         <Pressable
           style={{

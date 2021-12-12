@@ -341,6 +341,52 @@ export default function createStyles() {
       padding: 3,
       borderRadius: 10,
     },
+
+    messageInputComponent: {
+      paddingLeft: 10,
+      paddingRight: 10,
+      position: "absolute",
+      bottom: 0,
+      width: "100%",
+    },
+    messageInputContainer: {
+      backgroundColor: colors.border,
+      borderRadius: 25,
+      marginBottom: 8,
+      flexDirection: "row",
+      alignItems: "flex-end",
+      padding: 5,
+    },
+    messageTextInput: {
+      flex: 1,
+      marginLeft:8,
+      marginRight:8
+    },
+    messageInputCircleButton: {
+      borderRadius: 50,
+      aspectRatio: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      height: 32,
+    },
+    messageInputSmallButton: {
+      borderRadius: 50,
+      aspectRatio: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      width: 32,
+      marginLeft:3
+    },
+    messageInputTextInputText: {
+      flex: 1,
+      maxHeight: 120,
+      color: colors.text,
+      fontSize:16,
+      paddingTop: 5,
+      paddingBottom: 5,
+      marginTop: 3,
+      marginBottom: 3,
+    },
   });
   const style = { colors, css };
   return style;
