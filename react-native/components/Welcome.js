@@ -12,7 +12,8 @@ import axios from "axios";
 import store from "../app/store";
 import { useSelector } from "react-redux";
 import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
-import GLOBAL from '../GLOBAL.json'
+import { fetchMessage } from "../features/message/messageSlice";
+import GLOBAL from "../GLOBAL.json";
 
 const Welcome = () => {
   const styles = createStyles();
@@ -21,8 +22,8 @@ const Welcome = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("press");
           store.dispatch(fetchUser(item.id));
+          store.dispatch(fetchMessage(item.id));
         }}
       >
         <View
@@ -60,7 +61,6 @@ const Welcome = () => {
       for (let bot of getBots.data) {
         botsArr.push({ id: bot.userId });
       }
-      console.log(botsArr);
       setBots(botsArr);
     })();
   }, []);

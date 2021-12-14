@@ -180,10 +180,11 @@ const ChatMessageInput = () => {
             onChangeText={(text) => onChangeText(text)}
           />
         </View>
-        <View>
+        <View style={{ height: "100%", minWidth: 60 }}>
           <Animated.View
             style={[
               {
+                display: !inputContent ? "flex" : "none",
                 flexDirection: "row",
                 transform: [
                   {
@@ -234,7 +235,7 @@ const ChatMessageInput = () => {
                     <View
                       style={{
                         position: "absolute",
-                        height: 26,
+                        height: 12,
                         width: 23,
                         overflow: "hidden",
                         top: 9,
@@ -245,7 +246,7 @@ const ChatMessageInput = () => {
                         name="logo-reddit"
                         size={32}
                         color={styles.colors.text}
-                        style={{ top: -15, left: -9 }}
+                        style={{ top: -15, left: -9, position: "absolute" }}
                       />
                     </View>
                   </TouchableOpacity>
@@ -317,7 +318,10 @@ const ChatMessageInput = () => {
                   {
                     fontSize: 18,
                     color: styles.colors.smartButton,
-                    padding: 10,
+                    paddingLeft: 5,
+                    paddingRight: 10,
+                    paddingTop: 10,
+                    paddingBottom: 10,
                   },
                 ]}
               >

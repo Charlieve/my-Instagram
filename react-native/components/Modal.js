@@ -23,6 +23,7 @@ import axios from "axios";
 import store from "../app/store";
 import { useSelector } from "react-redux";
 import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
+import { fetchMessage, offloadMessage } from "../features/message/messageSlice";
 
 export default function ModalStackScreen({ navigation }) {
   const styles = createStyles();
@@ -59,8 +60,9 @@ export default function ModalStackScreen({ navigation }) {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("press");
+          store.dispatch(offloadMessage())
           store.dispatch(fetchUser(item.id));
+          store.dispatch(fetchMessage(item.id));
         }}
       >
         <View

@@ -4,10 +4,12 @@ import { ScrollView, View, Text } from "react-native";
 const ChatMessageContent = (props) => {
   return (
     <ScrollView style={{ flex: 1 }}>
-      <View style={{height:6000, backgroundColor:'#000'}}>
+      <View 
+      // style={{height:6000}}
+      >
         <Text></Text>
-        {props.children}
       </View>
+        {props.children}
     </ScrollView>
   );
 };

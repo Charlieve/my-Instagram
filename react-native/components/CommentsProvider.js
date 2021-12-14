@@ -1,5 +1,5 @@
 import GLOBAL from "../GLOBAL.json";
-import React, { useState, createContext,useEffect } from "react";
+import React, { useState, createContext, useEffect, Platform } from "react";
 import { KeyboardAvoidingView, View } from "react-native";
 import Comments from "./Comments";
 import CommentInput from "./CommentInput";
@@ -8,8 +8,7 @@ import axios from "axios";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
-import {CommentContext} from './CommentContext'
-
+import { CommentContext } from "./CommentContext";
 
 export default function CommentsProvider({ navigation, route }) {
   const userId = useSelector(selectUserId);
@@ -65,7 +64,13 @@ export default function CommentsProvider({ navigation, route }) {
         }}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={
+            Platform?.OS === "ios"
+              ? "padding"
+              : //  "height"
+                "padding"
+          }
+          enabled
           keyboardVerticalOffset={64}
           style={{ flex: 1 }}
         >

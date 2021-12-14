@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import { useSelector, useDispatch } from "react-redux";
-import { selectUserMessage, deleteMessage } from "../features/user/userSlice";
+import { selectMessage, deleteMessage } from "../features/message/messageSlice";
 
 import ChatScreenSearch from "./ChatScreenSearch";
 
@@ -258,7 +258,7 @@ const ChatList = ({ message }) => {
 
 const ChatScreenChatList = ({ userId }) => {
   const navigation = useNavigation();
-  const message = useSelector(selectUserMessage);
+  const message = useSelector(selectMessage);
   const styles = createStyles();
   return (
     <View style={{ flex: 1 }}>

@@ -327,6 +327,22 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           posts: 1,
           followers: 1,
           followings: 1,
+        },
+      });
+      res.send(userData);
+    } catch (err) {
+      res.send(err);
+    }
+  });
+
+  //GET USER MESSAGE DATA
+
+  app.route("/api/user/:id/message").get(async (req, res) => {
+    const requestingId = req.params.id;
+    try {
+      const userData = await findUserById(requestingId, {
+        projection: {
+          _id: 0,
           message: 1,
         },
       });

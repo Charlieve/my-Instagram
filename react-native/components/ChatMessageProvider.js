@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, KeyboardAvoidingView } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform } from "react-native";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
@@ -14,7 +14,13 @@ const ChatMessageProvider = ({ contactId }) => {
   return (
     <ChatMessageContext.Provider value={{ inputContent, onChangeText }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform?.OS === "ios"
+            ? "padding"
+            : //  "height"
+              "padding"
+        }
+        enabled
         keyboardVerticalOffset={85}
         style={{ flex: 1 }}
       >

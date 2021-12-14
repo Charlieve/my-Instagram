@@ -17,7 +17,7 @@ const LoadingEffect = ({ style }) => {
     { iterations: -1 }
   ).start();
   return (
-    <View style={[{ borderRadius: "50%", overflow: "hidden" }, style]}>
+    <View style={[{ borderRadius: 50, overflow: "hidden" }, style]}>
       <View
         style={{
           flex: 1,

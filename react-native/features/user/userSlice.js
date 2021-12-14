@@ -37,52 +37,6 @@ export const followUser = createAsyncThunk(
   }
 );
 
-export const createMessage = createAsyncThunk(
-  "user/createMessage",
-  async (targetId, state) => {
-    const response = await axios({
-      method: "post",
-      headers: {
-        "content-type": "application/json",
-        Accept: "application/json",
-      },
-      url: GLOBAL.SERVERIP + "/api/message",
-      data: {
-        targetId,
-        userId: state.getState().user.userInfo.userId,
-      },
-    })
-      .then((response) => response.data)
-      .catch((error) => {
-        console.error(error);
-      });
-    return response;
-  }
-);
-
-export const deleteMessage = createAsyncThunk(
-  "user/deleteMessage",
-  async (targetId, state) => {
-    const response = await axios({
-      method: "post",
-      headers: {
-        "content-type": "application/json",
-        Accept: "application/json",
-      },
-      url: GLOBAL.SERVERIP + "/api/deletemessage",
-      data: {
-        targetId,
-        userId: state.getState().user.userInfo.userId,
-      },
-    })
-      .then((response) => response.data)
-      .catch((error) => {
-        console.error(error);
-      });
-    return response;
-  }
-);
-
 const userSlice = createSlice({
   name: "user",
   initialState: initialState,
@@ -94,7 +48,6 @@ const userSlice = createSlice({
     [fetchUser.fulfilled]: (state, action) => {
       state.status = "succeeded";
       state.userInfo = action.payload;
-      state.userInfo.message = state.userInfo.message || [];
     },
     [followUser.fulfilled]: (state, action) => {
       if (action.payload.status === "followed") {
@@ -107,20 +60,6 @@ const userSlice = createSlice({
         );
         state.userInfo.followingQty--;
       }
-    },
-    [createMessage.fulfilled]: (state, action) => {
-      state.userInfo.message.push({
-        userId: action.payload.userId,
-        message: [],
-      });
-    },
-    [deleteMessage.fulfilled]: (state, action) => {
-      //delete it before request
-      state.userInfo.message = state.userInfo.message.filter(
-        (item) =>
-          JSON.stringify(item.userId.sort()) !==
-          JSON.stringify(action.payload.userId.sort())
-      );
     },
   },
 });
@@ -140,4 +79,3 @@ export const selectUserFollowingQty = (state) =>
 export const selectUserPosts = (state) => state.user.userInfo.posts;
 export const selectUserFollowers = (state) => state.user.userInfo.followers;
 export const selectUserFollowings = (state) => state.user.userInfo.followings;
-export const selectUserMessage = (state) => state.user.userInfo.message;

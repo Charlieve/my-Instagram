@@ -17,7 +17,8 @@ import createStyles from "../styles/styles";
 import axios from "axios";
 
 import { useSelector, useDispatch } from "react-redux";
-import { selectUserId, selectUserMessage, createMessage } from "../features/user/userSlice";
+import { selectUserId } from "../features/user/userSlice";
+import { selectMessage, createMessage } from "../features/message/messageSlice";
 
 const SelectedUserButton = ({ userId, selectUsers, setSelectUsers }) => {
   const styles = createStyles();
@@ -214,7 +215,7 @@ const ChatNewMessage = () => {
   const styles = createStyles();
   const [searchUserList, setSearchUserList] = useState([]);
   const [selectUsers, setSelectUsers] = useState([]);
-  const message = useSelector(selectUserMessage);
+  const message = useSelector(selectMessage);
   return (
     <SafeAreaView style={{ flex: 1, marginTop: 25 }}>
       <View style={[styles.css.custumizeHeader, { alignItems: "center" }]}>
@@ -238,20 +239,20 @@ const ChatNewMessage = () => {
           disabled={selectUsers.length !== 1} //only private chat now, will develop group chat
           onPress={() => {
             if (
-              !!(message.filter(
+              !!message.filter(
                 (item) =>
                   JSON.stringify(item.userId.sort()) ===
                   JSON.stringify(selectUsers.sort())
-              ).length)
+              ).length
             ) {
               //contact already exists
               navigation.goBack();
-              navigation.push("ChatMessage",{contactId:selectUsers});
+              navigation.push("ChatMessage", { contactId: selectUsers });
             } else {
               //need to create contact
-              dispatch(createMessage(selectUsers[0]))
+              dispatch(createMessage(selectUsers[0]));
               navigation.goBack();
-              navigation.push("ChatMessage",{contactId:selectUsers});
+              navigation.push("ChatMessage", { contactId: selectUsers });
             }
           }}
         >

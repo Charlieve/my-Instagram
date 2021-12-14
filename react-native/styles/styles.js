@@ -360,7 +360,7 @@ export default function createStyles() {
     messageTextInput: {
       flex: 1,
       marginLeft:8,
-      marginRight:8
+      marginRight:0
     },
     messageInputCircleButton: {
       borderRadius: 50,
