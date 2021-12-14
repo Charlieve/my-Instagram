@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
 import { fetchMessage } from "../features/message/messageSlice";
 import GLOBAL from "../GLOBAL.json";
+import message from "../features/message/messageHandler";
 
 const Welcome = () => {
   const styles = createStyles();
@@ -23,7 +24,7 @@ const Welcome = () => {
       <TouchableOpacity
         onPress={() => {
           store.dispatch(fetchUser(item.id));
-          store.dispatch(fetchMessage(item.id));
+          message.online(item.id)
         }}
       >
         <View

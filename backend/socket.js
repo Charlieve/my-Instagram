@@ -41,18 +41,15 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
       onlineUsers = onlineUsers.filter((item) => item !== data);
 
       //tell contacts i'm offline
-      socket
-        .to(data + "CONTACTS")
-        .emit("contactOffline", `${data} is offline.`);
+      socket.to(data + "CONTACTS").emit("contactOffline", data);
     });
 
-    socket.on("disconnect", function (data) {
+    socket.on("disconnect", function () {
       for (const id of userId) {
         onlineUsers = onlineUsers.filter((item) => item !== id);
         //tell contacts i'm offline
-        socket
-          .to(id + "CONTACTS")
-          .emit("contactOffline", `${id} is offline.`);
+        console.log(id);
+        socket.to(id + "CONTACTS").emit("contactOffline", id);
       }
 
       console.log(`${LOGTEXT()} is disconnected.`);
@@ -62,8 +59,99 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
       userContacts = targetUsers;
       for (const userId of userContacts) {
         socket.join(userId + "CONTACTS");
+
+        //get contacts if online already
+        if (onlineUsers.some((onlineUserId) => onlineUserId === userId)) {
+          socket.emit("contactOnline", userId);
+        }
       }
       console.log(`${LOGTEXT()} SYNC: ${userContacts}`);
     });
+
+    socket.on("sendMessageFromClient", async (data) => {
+      // console.log(data);
+      const trackingMessageId = data.sendMessageData.trackingMessageId;
+      const authedUserId = data.authedUserId;
+      const messageData = {
+        status: "success",
+        userId: authedUserId,
+        index: data.sendMessageData.index, //unstable
+        contentType: data.sendMessageData.contentType,
+        content: data.sendMessageData.content,
+        date: Date.now(),
+        reactions: [],
+        readedBy: [],
+      };
+      await saveMessage(
+        authedUserId,
+        {
+          $push: { "message.$[elem].message": messageData },
+        },
+        { arrayFilters: [{ "elem.userId": { $eq: data.targetUserId } }] }
+      );
+      socket.emit("sendMessageFromClientSuccess", {
+        targetUserId: data.targetUserId,
+        trackingMessageId,
+      });
+      for (targetUserIdSep of data.targetUserId) {
+        const userGroup = [...data.targetUserId, authedUserId].filter(
+          (item) => item !== targetUserIdSep
+        );
+        if (onlineUsers.includes(targetUserIdSep)) {
+          saveMessage(
+            targetUserIdSep,
+            {
+              $push: {
+                "message.$[elem].message": {
+                  ...messageData,
+                  status: "delivered",
+                },
+              },
+            },
+            { arrayFilters: [{ "elem.userId": { $eq: userGroup } }] }
+          );
+          socket
+            .to(targetUserIdSep + "SELF")
+            .emit("sendMessageFromOtherUser", {
+              targetUserId: userGroup,
+              sendMessageData: messageData,
+            });
+        } else {
+          saveMessage(
+            targetUserIdSep,
+            {
+              $push: {
+                "message.$[elem].message": {
+                  ...messageData,
+                  status: "undelivered",
+                },
+              },
+            },
+            { arrayFilters: [{ "elem.userId": { $eq: userGroup } }] }
+          );
+        }
+      }
+    });
   });
+
+  // PROMISE
+  const saveMessage = (userId, updateAction, option) =>
+    new Promise((resolve, reject) => {
+      DBUsers.findOneAndUpdate(
+        { userId },
+        updateAction,
+        option,
+        (err, user) => {
+          if (err) {
+            reject(err);
+          }
+          if (!user.value) {
+            reject("user no found");
+          }
+          if (user.value) {
+            resolve(user.value);
+          }
+        }
+      );
+    });
 };

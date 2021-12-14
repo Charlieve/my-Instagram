@@ -346,6 +346,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
           message: 1,
         },
       });
+      userData.message = userData.message || [];
       res.send(userData);
     } catch (err) {
       res.send(err);

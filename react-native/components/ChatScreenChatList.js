@@ -16,7 +16,11 @@ import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import { useSelector, useDispatch } from "react-redux";
-import { selectMessage, deleteMessage } from "../features/message/messageSlice";
+import {
+  selectMessage,
+  deleteMessage,
+  selectMessageContacts,
+} from "../features/message/messageSlice";
 
 import ChatScreenSearch from "./ChatScreenSearch";
 
@@ -28,12 +32,17 @@ const EmptyChatList = () => {
       style={{
         height: "100%",
         padding: "10%",
-        paddingTop: '0%',
+        paddingTop: "0%",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Text style={[styles.css.boldFont, { fontSize: 24, fontWeight: "800", marginTop:-80 }]}>
+      <Text
+        style={[
+          styles.css.boldFont,
+          { fontSize: 24, fontWeight: "800", marginTop: -80 },
+        ]}
+      >
         Message your friends
       </Text>
       <Text
@@ -61,6 +70,10 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
   const navigation = useNavigation();
   const styles = createStyles();
   const dispatch = useDispatch();
+  const contacts = useSelector(selectMessageContacts);
+  const isActive = userId.some((userId) =>
+    contacts.some((contact) => userId === contact.userId && contact.online)
+  );
 
   let open = false;
   const pan = useRef(new Animated.ValueXY()).current;
@@ -147,7 +160,11 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
             dispatch(deleteMessage(userId));
           }}
         >
-          <Text style={[styles.css.normalFont, { fontSize: 18, color:'white' }]}>Delete</Text>
+          <Text
+            style={[styles.css.normalFont, { fontSize: 18, color: "white" }]}
+          >
+            Delete
+          </Text>
         </TouchableOpacity>
         <Pressable
           style={{
@@ -213,12 +230,29 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
           ]}
           onPress={() => navigation.push("ChatMessage", { contactId: userId })}
         >
-          <Image
-            style={{ height: "100%", aspectRatio: 1, borderRadius: 50 }}
-            source={{
-              uri: `${GLOBAL.SERVERIP}/users/${userId}/userimage.png`,
+          <View
+            style={{
+              height: "100%",
+              aspectRatio: 1,
             }}
-          />
+          >
+            <Image
+              style={{
+                height: "100%",
+                width: "100%",
+                aspectRatio: 1,
+                borderRadius: 50,
+              }}
+              source={{
+                uri: `${GLOBAL.SERVERIP}/users/${userId}/userimage.png`,
+              }}
+            />
+            {isActive === true && (
+              <View style={styles.css.userOnlineDotBackground}>
+                <View style={styles.css.userOnlineDot} />
+              </View>
+            )}
+          </View>
           <Text
             style={[
               styles.css.boldFont,

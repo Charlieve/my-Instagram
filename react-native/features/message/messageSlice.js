@@ -1,8 +1,8 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit";
 import GLOBAL from "../../GLOBAL.json";
 import axios from "axios";
 
-import message from "./messageHandler";
+// import message from "./messageHandler";
 
 const initialState = {
   status: "idle",
@@ -84,22 +84,92 @@ const messageSlice = createSlice({
   initialState: initialState,
   reducers: {
     offloadMessage(state, action) {
-      message.offline(state.userId);
+      // message.offline(state.userId);
+      console.log(state.status);
       state.status = initialState.status;
       state.userId = initialState.userId;
       state.contacts = initialState.contacts;
       state.data = initialState.data;
     },
     contactOnline(state, action) {
-      console.log(state)
-      const updatedContacts = state.contacts.filter((item) => {
-        // console.log(item)
+      const updatedContacts = state.contacts.map((item) => {
+        return {
+          userId: item.userId,
+          online: item.userId === action.payload ? true : item.online,
+        };
+      });
+      state.contacts = updatedContacts;
+    },
+    contactOffline(state, action) {
+      const updatedContacts = state.contacts.map((item) => {
         return {
           userId: item.userId,
           online: item.userId === action.payload ? false : item.online,
         };
       });
       state.contacts = updatedContacts;
+    },
+    pushMessage(state, action) {
+      const updatedState = state.data.slice();
+      updatedState[action.payload.contactIndex].message.push(
+        action.payload.sendMessageData
+      );
+      state.data = updatedState;
+    },
+    sendMessageSuccess(state, action) {
+      const updatedState = state.data.slice();
+      const trackingMessageId = action.payload.trackingMessageId;
+      let targetUserId = action.payload.targetUserId;
+      targetUserId = Array.isArray(targetUserId)
+        ? targetUserId
+        : [targetUserId];
+      const index = state.data
+        .map((item) => item.userId.sort())
+        .findIndex(
+          (item) => JSON.stringify(item) === JSON.stringify(targetUserId.sort())
+        );
+      updatedState[index].message = updatedState[index].message.map((item) =>
+        item.trackingMessageId === trackingMessageId
+          ? { ...item, status: "success" }
+          : item
+      );
+      state.data = updatedState;
+    },
+    receiveMessage(state, action) {
+      const updatedState = state.data.slice();
+      const targetUserId = action.payload.targetUserId;
+      const index = updatedState
+        .map((item) => item.userId.sort())
+        .findIndex(
+          (item) => JSON.stringify(item) === JSON.stringify(targetUserId.sort())
+        );
+      if (index !== -1) {
+        updatedState[index].message.push(action.payload.sendMessageData);
+        state.data = updatedState;
+      } else {
+        // if received message is not in users contact list
+        // add to user contact list and push to new message data
+        axios({
+          method: "post",
+          headers: {
+            "content-type": "application/json",
+            Accept: "application/json",
+          },
+          url: GLOBAL.SERVERIP + "/api/message",
+          data: {
+            targetUserId,
+            userId: state.userId,
+          },
+        });
+        const updatedContacts = state.contacts.slice();
+        updatedContacts.push({ userId: targetUserId, online: true });
+        updatedState.push({
+          userId: targetUserId,
+          message: [action.payload.sendMessageData],
+        });
+        state.contacts = updatedContacts;
+        state.data = updatedState;
+      }
     },
   },
   extraReducers: {
@@ -112,14 +182,15 @@ const messageSlice = createSlice({
       state.contacts = [...new Set(action.payload.contacts)];
       state.data = action.payload.message || [];
 
-      message.online(action.payload.userId);
+      // message.online(action.payload.userId);
       const contacts = [];
       for (const contact of [...new Set(action.payload.contacts)]) {
         contacts.push(contact.userId);
       }
-      message.syncUsersActivity(contacts);
+      // message.syncUsersActivity(contacts);
     },
     [createMessage.fulfilled]: (state, action) => {
+      state.contacts.push({ userId: action.payload.userId, online: false });
       state.data.push({
         userId: action.payload.userId,
         message: [],
@@ -136,8 +207,29 @@ const messageSlice = createSlice({
   },
 });
 
-export const { offloadMessage, contactOnline } = messageSlice.actions;
+export const {
+  offloadMessage,
+  contactOnline,
+  contactOffline,
+  pushMessage,
+  sendMessageSuccess,
+  receiveMessage
+} = messageSlice.actions;
 
 export default messageSlice.reducer;
 
 export const selectMessage = (state) => state.message.data;
+export const selectMessageContacts = (state) => state.message.contacts;
+
+export const selectMessageByIndex = (state, index) => {
+  return state.message.data[index].message;
+};
+export const selectMessageIndexByUserId = (state, userId) => {
+  userId = Array.isArray(userId) ? userId : [userId];
+  const index = state.message.data
+    .map((item) => item.userId.sort())
+    .findIndex(
+      (item) => JSON.stringify(item) === JSON.stringify(userId.sort())
+    );
+  return index;
+};

@@ -1,5 +1,5 @@
 import GLOBAL from "../GLOBAL.json";
-import React, { useContext, useRef, useEffect } from "react";
+import React, { useContext, useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,15 @@ import {
   Animated,
 } from "react-native";
 import createStyles from "../styles/styles";
-import axios from "axios";
+import uniqid from 'uniqid';
 import Icon from "react-native-vector-icons/Ionicons";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
 
 import { ChatMessageContext } from "./ChatMessageContext";
+
+import message from "../features/message/messageHandler";
 
 const HiddenButton = (props) => {
   const { showAllButtons, typing } = props;
@@ -93,12 +95,37 @@ const TypingButton = (props) => {
   );
 };
 
-const ChatMessageInput = () => {
-  const { inputContent, onChangeText } = useContext(ChatMessageContext);
+const ChatMessageInput = ({ contactId }) => {
+  const { messageData, contactIndex } = useContext(ChatMessageContext);
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const typing = useRef(new Animated.Value(0)).current;
   const showAllButtons = useRef(new Animated.Value(0)).current;
+  const [inputContent, onChangeText] = useState("");
+  // SEND MESSAGE ACTION
+
+  const sendMessage = (content) => {
+    if (inputContent !== "") {
+      const index = messageData.length;
+      const sendMessageData = {
+        status: "pending",
+        index,
+        userId,
+        contentType: "chat",
+        content: inputContent,
+        date: Date.now(),
+        reactions: [],
+        readedBy: [],
+        trackingMessageId: uniqid()
+      };
+      message.sendMessage({
+        sendMessageData,
+        contactIndex,
+        targetUserId: [contactId],
+      });
+      onChangeText("");
+    }
+  };
 
   useEffect(() => {
     if (inputContent.length > 0 && typing.__getValue() === 0) {
@@ -324,6 +351,7 @@ const ChatMessageInput = () => {
                     paddingBottom: 10,
                   },
                 ]}
+                onPress={() => sendMessage(inputContent)}
               >
                 Send
               </Text>

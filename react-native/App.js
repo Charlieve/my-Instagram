@@ -1,3 +1,4 @@
+import GLOBAL from "./GLOBAL.json";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import store from "./app/store";
@@ -33,7 +34,15 @@ import ProfileStackScreen from "./components/Profile";
 
 import Welcome from "./components/Welcome";
 
-const TEST_USER_ID = "bot.drugs_post_office";
+// SOCKET.IO
+// import { io } from "socket.io-client";
+import message from "./features/message/messageHandler";
+const SOCKETCONNECT = () => {
+  // const socket = io(GLOBAL.SERVERIP, { withCredentials: true });
+  // console.log(socket)
+  // message.test();
+  message.subscript();
+};
 
 //THEME CONFIG
 
@@ -48,7 +57,9 @@ const Theme = {
     popup: "white",
     like: "rgb(237, 73, 86)",
     warning: "#f44",
-    smartButton: '#337bef'
+    smartButton: "#337bef",
+    online: "#00cf00",
+    chatBubble: "#7351da"
   },
 };
 
@@ -65,7 +76,9 @@ const ThemeDark = {
     subText: "gray",
     like: "rgb(237, 73, 86)",
     warning: "#f44",
-    smartButton: '#337bef'
+    smartButton: "#337bef",
+    online: "#00cf00",
+    chatBubble: "#7351da"
   },
 };
 
@@ -163,26 +176,30 @@ function HomeTabs() {
 function App1() {
   const scheme = useColorScheme();
   const userInfoStatus = useSelector(selectUserInfoStatus);
+  useEffect(() => {
+    SOCKETCONNECT();
+  }, []);
+
   if (userInfoStatus === "idle") {
     // store.dispatch(fetchUser());
     return (
-        <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "center",
-              backgroundColor:
-                scheme === "dark"
-                  ? ThemeDark.colors.background
-                  : Theme.colors.background,
-            }}
-          >
-            <View style={{ flex: 1, maxWidth: 800 }}>
-              <Welcome />
-            </View>
+      <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            backgroundColor:
+              scheme === "dark"
+                ? ThemeDark.colors.background
+                : Theme.colors.background,
+          }}
+        >
+          <View style={{ flex: 1, maxWidth: 800 }}>
+            <Welcome />
           </View>
-        </NavigationContainer>
+        </View>
+      </NavigationContainer>
     );
   } else {
     return (
@@ -196,117 +213,115 @@ function App1() {
         }}
       >
         <View style={{ flex: 1, maxWidth: 800 }}>
-            <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
-              <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen key="mainPage" name="App" component={HomeTabs} />
-                <Stack.Screen
-                  name="Chat"
-                  component={ChatStackScreen}
-                />
-                <Stack.Screen
-                  name="Comments"
-                  component={CommentsProvider}
-                  options={({ navigation }) => ({
-                    headerShown: true,
-                    headerStyle: { height: 64 },
-                    headerLeft: () => (
-                      <Icon
-                        onPress={() => navigation.goBack()}
-                        name="chevron-back"
-                        color={
-                          scheme === "dark"
-                            ? ThemeDark.colors.text
-                            : Theme.colors.text}
-                        size={40}
-                      />
-                    ),
-                  })}
-                />
-                <Stack.Screen
-                  name="BottomSheet"
-                  component={BottomSheetStackScreen}
-                  options={({ navigation }) => ({
-                    headerTransparent: false,
-                    cardStyle: { backgroundColor: "transparent" },
-                    presentation: "transparentModal",
-                    transitionSpec: {
-                      open: {
-                        animation: "timing",
-                        config: { duration: 200, easing: Easing.linear },
-                      },
-                      close: {
-                        animation: "timing",
-                        config: { duration: 200, easing: Easing.cubic },
-                      },
+          <NavigationContainer theme={scheme === "dark" ? ThemeDark : Theme}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen key="mainPage" name="App" component={HomeTabs} />
+              <Stack.Screen name="Chat" component={ChatStackScreen} />
+              <Stack.Screen
+                name="Comments"
+                component={CommentsProvider}
+                options={({ navigation }) => ({
+                  headerShown: true,
+                  headerStyle: { height: 64 },
+                  headerLeft: () => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={
+                        scheme === "dark"
+                          ? ThemeDark.colors.text
+                          : Theme.colors.text
+                      }
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="BottomSheet"
+                component={BottomSheetStackScreen}
+                options={({ navigation }) => ({
+                  headerTransparent: false,
+                  cardStyle: { backgroundColor: "transparent" },
+                  presentation: "transparentModal",
+                  transitionSpec: {
+                    open: {
+                      animation: "timing",
+                      config: { duration: 200, easing: Easing.linear },
                     },
-                    headerLeft: ({ color }) => (
-                      <Icon
-                        onPress={() => navigation.goBack()}
-                        name="chevron-back"
-                        color={color}
-                        size={40}
-                      />
-                    ),
-                  })}
-                />
-                <Stack.Screen
-                  name="Modal"
-                  component={ModalStackScreen}
-                  options={({ navigation }) => ({
-                    headerTransparent: false,
-                    headerMode :'screen',
-                    cardStyle: { backgroundColor: "transparent" },
-                    presentation: "modal",
-                    headerLeft: ({ color }) => (
-                      <Icon
-                        onPress={() => navigation.goBack()}
-                        name="chevron-back"
-                        color={color}
-                        size={40}
-                      />
-                    ),
-                  })}
-                />
-                <Stack.Screen
-                  name="AnimationFeed"
-                  component={AnimationFeedScreen}
-                  options={({ navigation }) => ({
-                    headerTransparent: false,
-                    cardStyle: { backgroundColor: "transparent" },
-                    presentation: "transparentModal",
-                    gestureEnabled: false,
-                    transitionSpec: {
-                      open: {
-                        animation: "timing",
-                        config: { duration: 0, easing: Easing.linear },
-                      },
-                      close: {
-                        animation: "timing",
-                        config: { duration: 100, easing: Easing.exp },
-                      },
+                    close: {
+                      animation: "timing",
+                      config: { duration: 200, easing: Easing.cubic },
                     },
-                    headerLeft: ({ color }) => (
-                      <Icon
-                        onPress={() => navigation.goBack()}
-                        name="chevron-back"
-                        color={color}
-                        size={40}
-                      />
-                    ),
-                  })}
-                />
-              </Stack.Navigator>
-            </NavigationContainer>
+                  },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="Modal"
+                component={ModalStackScreen}
+                options={({ navigation }) => ({
+                  headerTransparent: false,
+                  headerMode: "screen",
+                  cardStyle: { backgroundColor: "transparent" },
+                  presentation: "modal",
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="AnimationFeed"
+                component={AnimationFeedScreen}
+                options={({ navigation }) => ({
+                  headerTransparent: false,
+                  cardStyle: { backgroundColor: "transparent" },
+                  presentation: "transparentModal",
+                  gestureEnabled: false,
+                  transitionSpec: {
+                    open: {
+                      animation: "timing",
+                      config: { duration: 0, easing: Easing.linear },
+                    },
+                    close: {
+                      animation: "timing",
+                      config: { duration: 100, easing: Easing.exp },
+                    },
+                  },
+                  headerLeft: ({ color }) => (
+                    <Icon
+                      onPress={() => navigation.goBack()}
+                      name="chevron-back"
+                      color={color}
+                      size={40}
+                    />
+                  ),
+                })}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
         </View>
       </View>
     );
   }
 }
 
-
 export default function App() {
   return (
     <Provider store={store}>
       <App1 />
-      </Provider>)
+    </Provider>
+  );
 }

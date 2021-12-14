@@ -250,9 +250,11 @@ const ChatNewMessage = () => {
               navigation.push("ChatMessage", { contactId: selectUsers });
             } else {
               //need to create contact
-              dispatch(createMessage(selectUsers[0]));
-              navigation.goBack();
-              navigation.push("ChatMessage", { contactId: selectUsers });
+              (async () => {
+                await dispatch(createMessage(selectUsers[0]));
+                navigation.goBack();
+                navigation.push("ChatMessage", { contactId: selectUsers });
+              })();
             }
           }}
         >

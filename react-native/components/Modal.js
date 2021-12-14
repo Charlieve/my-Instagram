@@ -24,6 +24,7 @@ import store from "../app/store";
 import { useSelector } from "react-redux";
 import { fetchUser, selectUserInfoStatus } from "../features/user/userSlice";
 import { fetchMessage, offloadMessage } from "../features/message/messageSlice";
+import message from "../features/message/messageHandler";
 
 export default function ModalStackScreen({ navigation }) {
   const styles = createStyles();
@@ -60,9 +61,9 @@ export default function ModalStackScreen({ navigation }) {
     return (
       <TouchableOpacity
         onPress={() => {
-          store.dispatch(offloadMessage())
           store.dispatch(fetchUser(item.id));
-          store.dispatch(fetchMessage(item.id));
+          message.offline()
+          message.online(item.id);
         }}
       >
         <View

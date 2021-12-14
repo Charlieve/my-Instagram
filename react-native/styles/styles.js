@@ -359,8 +359,8 @@ export default function createStyles() {
     },
     messageTextInput: {
       flex: 1,
-      marginLeft:8,
-      marginRight:0
+      marginLeft: 8,
+      marginRight: 0,
     },
     messageInputCircleButton: {
       borderRadius: 50,
@@ -375,17 +375,64 @@ export default function createStyles() {
       justifyContent: "center",
       alignItems: "center",
       width: 32,
-      marginLeft:3
+      marginLeft: 3,
     },
     messageInputTextInputText: {
       flex: 1,
       maxHeight: 120,
       color: colors.text,
-      fontSize:16,
+      fontSize: 16,
       paddingTop: 5,
       paddingBottom: 5,
       marginTop: 3,
       marginBottom: 3,
+    },
+
+    userOnlineDotBackground: {
+      position: "absolute",
+      bottom: -2,
+      right: -2,
+      width: 17,
+      height: 17,
+      backgroundColor: colors.background,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    userOnlineDot: {
+      position: "absolute",
+      width: 10,
+      height: 10,
+      backgroundColor: colors.online,
+      borderRadius: 50,
+    },
+
+    chatMessageContainer: {
+      paddingLeft: 12,
+      paddingRight: 12,
+    },
+
+    chatBubble: {
+      padding: 10,
+      backgroundColor: colors.border,
+      borderRadius: 20,
+      marginTop: 5,
+      marginBottom: 5,
+      width: "auto",
+      minHeight: 40,
+      minWidth: 40,
+      alignItems: "center",
+    },
+    chatFont: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    chatBubbleSelf: {
+      backgroundColor: colors.chatBubble,
+    },
+    chatFontSelf: {
+      fontSize: 16,
+      color: 'white',
     },
   });
   const style = { colors, css };
