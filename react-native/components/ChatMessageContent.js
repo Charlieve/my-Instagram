@@ -41,6 +41,7 @@ const ChatMessageContent = ({ contactId }) => {
       ListHeaderComponent={(
         <ChatMessageHeaderUserInfo contactId={contactId} />
       )}
+      // inverted={-1}
     />
   );
 };

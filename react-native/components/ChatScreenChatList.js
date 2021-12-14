@@ -247,11 +247,14 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
                 uri: `${GLOBAL.SERVERIP}/users/${userId}/userimage.png`,
               }}
             />
-            {isActive === true && (
-              <View style={styles.css.userOnlineDotBackground}>
-                <View style={styles.css.userOnlineDot} />
-              </View>
-            )}
+            <View
+              style={[
+                styles.css.userOnlineDotBackground,
+                { display: isActive ? "flex" : "none" },
+              ]}
+            >
+              <View style={styles.css.userOnlineDot} />
+            </View>
           </View>
           <Text
             style={[

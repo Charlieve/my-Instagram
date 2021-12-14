@@ -85,7 +85,6 @@ const messageSlice = createSlice({
   reducers: {
     offloadMessage(state, action) {
       // message.offline(state.userId);
-      console.log(state.status);
       state.status = initialState.status;
       state.userId = initialState.userId;
       state.contacts = initialState.contacts;
@@ -149,20 +148,22 @@ const messageSlice = createSlice({
       } else {
         // if received message is not in users contact list
         // add to user contact list and push to new message data
-        axios({
-          method: "post",
-          headers: {
-            "content-type": "application/json",
-            Accept: "application/json",
-          },
-          url: GLOBAL.SERVERIP + "/api/message",
-          data: {
-            targetUserId,
-            userId: state.userId,
-          },
-        });
+        // axios({
+        //   method: "post",
+        //   headers: {
+        //     "content-type": "application/json",
+        //     Accept: "application/json",
+        //   },
+        //   url: GLOBAL.SERVERIP + "/api/message",
+        //   data: {
+        //     targetId:targetUserId[0], //need to rewrite for group chat
+        //     userId: state.userId,
+        //   },
+        // });
         const updatedContacts = state.contacts.slice();
-        updatedContacts.push({ userId: targetUserId, online: true });
+        for (const userId of targetUserId) {
+          updatedContacts.push({ userId, online: true });
+        }
         updatedState.push({
           userId: targetUserId,
           message: [action.payload.sendMessageData],
@@ -213,7 +214,7 @@ export const {
   contactOffline,
   pushMessage,
   sendMessageSuccess,
-  receiveMessage
+  receiveMessage,
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

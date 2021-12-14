@@ -533,11 +533,13 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
 
   app.route("/api/message").post(async function (req, res) {
     try {
+      console.log(req.body)
       if (
         !req.body.userId ||
         !req.body.targetId ||
         req.body.targetId === req.body.userId
       ) {
+        console.log("Invalid User ID")
         reject("Invalid User ID");
       }
       const userId = req.body.userId;

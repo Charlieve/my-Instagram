@@ -6,7 +6,7 @@
 
 ## 🖥️Installation
 
-Install my-project with npm
+clone this repository
 
 ### Install
 #### Backend
@@ -37,7 +37,7 @@ replace your backend ip (prefer "192.168.x.x:3000")
 ***IMPORTANT
 
 Go to your backend site
-Create some 🤖Bots (who dont like Bots huh?) and add some posts for theme
+Create some 🤖Bots (who dont like Bots huh?) and add some posts for them
 
 
 
@@ -70,6 +70,7 @@ Animation
 - Like/Comment/Follow
 - Post preview
 - Bottom sheet (Feed action, switch account)
+- Chat/show user status
 
 
 ## License

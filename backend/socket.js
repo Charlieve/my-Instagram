@@ -97,6 +97,21 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
         const userGroup = [...data.targetUserId, authedUserId].filter(
           (item) => item !== targetUserIdSep
         );
+        // check targetUser's contacts includes user
+        const targetUserContacts = await findUserById(targetUserIdSep, {
+          projection: { _id: 0, message: { userId: 1 } },
+        });
+        if (
+          !targetUserContacts.message || //create "message" field
+          !targetUserContacts.message.filter(
+            (item) => JSON.stringify(item.userId) === `["${userGroup}"]`
+          ).length //check if contact exists
+        ) {
+          await findUserAndUpdate(targetUserIdSep, {
+            $push: { message: { userId: userGroup, message: [] } },
+          });
+        }
+
         if (onlineUsers.includes(targetUserIdSep)) {
           saveMessage(
             targetUserIdSep,
@@ -108,14 +123,15 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
                 },
               },
             },
-            { arrayFilters: [{ "elem.userId": { $eq: userGroup } }] }
+            {
+              arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+              upsert: true,
+            }
           );
-          socket
-            .to(targetUserIdSep + "SELF")
-            .emit("sendMessageFromOtherUser", {
-              targetUserId: userGroup,
-              sendMessageData: messageData,
-            });
+          socket.to(targetUserIdSep + "SELF").emit("sendMessageFromOtherUser", {
+            targetUserId: userGroup,
+            sendMessageData: messageData,
+          });
         } else {
           saveMessage(
             targetUserIdSep,
@@ -127,7 +143,10 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
                 },
               },
             },
-            { arrayFilters: [{ "elem.userId": { $eq: userGroup } }] }
+            {
+              arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+              upsert: true,
+            }
           );
         }
       }
@@ -153,5 +172,36 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
           }
         }
       );
+    });
+
+  //PROMISE --- GET ONE USER by ID
+  const findUserById = (userId, option) =>
+    new Promise((resolve, reject) => {
+      DBUsers.findOne({ userId }, option, (err, user) => {
+        if (err) {
+          reject(err);
+        }
+        if (user) {
+          resolve(user);
+        } else {
+          reject("user not found");
+        }
+      });
+    });
+
+  //PROMISE --- FIND USER by ID and UPDATE
+  const findUserAndUpdate = (userId, updateAction) =>
+    new Promise((resolve, reject) => {
+      DBUsers.findOneAndUpdate({ userId }, updateAction, (err, user) => {
+        if (err) {
+          reject(err);
+        }
+        if (!user.value) {
+          reject("user no found");
+        }
+        if (user.value) {
+          resolve(user.value);
+        }
+      });
     });
 };

@@ -9,7 +9,7 @@ import {
   Animated,
 } from "react-native";
 import createStyles from "../styles/styles";
-import uniqid from 'uniqid';
+import uuid from "react-native-uuid";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import { useSelector } from "react-redux";
@@ -116,7 +116,7 @@ const ChatMessageInput = ({ contactId }) => {
         date: Date.now(),
         reactions: [],
         readedBy: [],
-        trackingMessageId: uniqid()
+        trackingMessageId: uuid.v4(),
       };
       message.sendMessage({
         sendMessageData,

@@ -410,6 +410,8 @@ export default function createStyles() {
     chatMessageContainer: {
       paddingLeft: 12,
       paddingRight: 12,
+      paddingBottom: 60,
+      flexDirection: 'column',
     },
 
     chatBubble: {
