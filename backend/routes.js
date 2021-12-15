@@ -533,30 +533,31 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
 
   app.route("/api/message").post(async function (req, res) {
     try {
-      console.log(req.body)
+      console.log(req.body);
       if (
         !req.body.userId ||
-        !req.body.targetId ||
-        req.body.targetId === req.body.userId
+        !req.body.targetIdArr ||
+        !Array.isArray(req.body.targetIdArr) ||
+        req.body.targetIdArr.includes(req.body.userId)
       ) {
-        console.log("Invalid User ID")
+        console.log("Invalid User ID");
         reject("Invalid User ID");
       }
       const userId = req.body.userId;
-      const targetId = req.body.targetId;
+      const targetIdArr = req.body.targetIdArr;
       const userContacts = await findUserById(userId, {
         projection: { _id: 0, message: { userId: 1 } },
       });
       if (
         !userContacts.message || //create "message" field
         !userContacts.message.filter(
-          (item) => JSON.stringify(item.userId) === `["${targetId}"]`
+          (item) => JSON.stringify(item.userId) === JSON.stringify(targetIdArr)
         ).length //check if contact exists
       ) {
         await findUserAndUpdate(userId, {
-          $push: { message: { userId: [targetId], message: [] } },
+          $push: { message: { userId: targetIdArr, message: [] } },
         });
-        res.send({ status: "created contact", userId: [targetId] });
+        res.send({ status: "created contact", userId: targetIdArr });
       } else {
         res.send("already exists");
       }

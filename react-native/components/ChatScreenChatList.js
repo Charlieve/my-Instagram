@@ -23,6 +23,7 @@ import {
 } from "../features/message/messageSlice";
 
 import ChatScreenSearch from "./ChatScreenSearch";
+import UserIconImage from "./UserIconImage";
 
 const EmptyChatList = () => {
   const navigation = useNavigation();
@@ -236,17 +237,7 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
               aspectRatio: 1,
             }}
           >
-            <Image
-              style={{
-                height: "100%",
-                width: "100%",
-                aspectRatio: 1,
-                borderRadius: 50,
-              }}
-              source={{
-                uri: `${GLOBAL.SERVERIP}/users/${userId}/userimage.png`,
-              }}
-            />
+            <UserIconImage userId={userId} />
             <View
               style={[
                 styles.css.userOnlineDotBackground,
@@ -262,7 +253,13 @@ const ChatListItem = ({ userId, lastMessage, setScrollable }) => {
               { flex: 1, marginLeft: 15, marginRight: 10, fontSize: 13 },
             ]}
           >
-            {userId}
+            {String(userId).length > 20 && userId.length > 1
+              ? `${String(userId[0]).replace(/(.{10})(.*)/, "$1...")} and ${
+                  userId.length > 2
+                    ? String(userId.length - 1) + " other users"
+                    : String(userId[1]).replace(/(.{10})(.*)/, "$1...")
+                }`
+              : String(userId).replace(",", ", ")}
           </Text>
           <TouchableOpacity>
             <Icon

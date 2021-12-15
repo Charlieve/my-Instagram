@@ -21,7 +21,9 @@ const ChatBubble = ({ message }) => {
           message.status === "pending" && { opacity: 0.7 },
         ]}
       >
-        <Text style={styles.css.chatFont && styles.css.chatFontSelf}>
+        <Text
+          style={[styles.css.chatFont, myMessage && styles.css.chatFontSelf]}
+        >
           {message.content}
         </Text>
       </View>
@@ -38,9 +40,7 @@ const ChatMessageContent = ({ contactId }) => {
       renderItem={({ item }) => <ChatBubble message={item} />}
       keyExtractor={(item, index) => "message" + index}
       contentContainerStyle={styles.css.chatMessageContainer}
-      ListHeaderComponent={(
-        <ChatMessageHeaderUserInfo contactId={contactId} />
-      )}
+      ListHeaderComponent={<ChatMessageHeaderUserInfo contactId={contactId} />}
       // inverted={-1}
     />
   );

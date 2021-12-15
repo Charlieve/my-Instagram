@@ -25,7 +25,8 @@ export const fetchMessage = createAsyncThunk(
     response.contacts = [];
     for (const message of response.message) {
       for (const userId of message.userId) {
-        response.contacts.push({ userId, online: false });
+        // response.contacts.push({ userId, online: false });
+        response.contacts.push(userId);
       }
     }
 
@@ -35,7 +36,7 @@ export const fetchMessage = createAsyncThunk(
 
 export const createMessage = createAsyncThunk(
   "user/createMessage",
-  async (targetId, state) => {
+  async (targetIdArr, state) => {
     const response = await axios({
       method: "post",
       headers: {
@@ -44,7 +45,7 @@ export const createMessage = createAsyncThunk(
       },
       url: GLOBAL.SERVERIP + "/api/message",
       data: {
-        targetId,
+        targetIdArr,
         userId: state.getState().user.userInfo.userId,
       },
     })
@@ -180,15 +181,12 @@ const messageSlice = createSlice({
     [fetchMessage.fulfilled]: (state, action) => {
       state.status = "succeeded";
       state.userId = action.payload.userId;
-      state.contacts = [...new Set(action.payload.contacts)];
       state.data = action.payload.message || [];
-
-      // message.online(action.payload.userId);
-      const contacts = [];
-      for (const contact of [...new Set(action.payload.contacts)]) {
-        contacts.push(contact.userId);
+      const contactsObjectsArr = [];
+      for (const contactUserId of Array.from(new Set(action.payload.contacts))) {
+        contactsObjectsArr.push({ userId: contactUserId, online: false });
       }
-      // message.syncUsersActivity(contacts);
+      state.contacts = contactsObjectsArr;
     },
     [createMessage.fulfilled]: (state, action) => {
       state.contacts.push({ userId: action.payload.userId, online: false });
@@ -226,11 +224,11 @@ export const selectMessageByIndex = (state, index) => {
   return state.message.data[index].message;
 };
 export const selectMessageIndexByUserId = (state, userId) => {
-  userId = Array.isArray(userId) ? userId : [userId];
+  userId = Array.isArray(userId) ? [...userId].sort() : [userId];
   const index = state.message.data
-    .map((item) => item.userId.sort())
+    .map((item) => item.userId)
     .findIndex(
-      (item) => JSON.stringify(item) === JSON.stringify(userId.sort())
+      (item) => JSON.stringify([...item].sort()) === JSON.stringify(userId)
     );
   return index;
 };

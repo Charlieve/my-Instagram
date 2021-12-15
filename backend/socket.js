@@ -69,87 +69,92 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
     });
 
     socket.on("sendMessageFromClient", async (data) => {
-      // console.log(data);
-      const trackingMessageId = data.sendMessageData.trackingMessageId;
-      const authedUserId = data.authedUserId;
-      const messageData = {
-        status: "success",
-        userId: authedUserId,
-        index: data.sendMessageData.index, //unstable
-        contentType: data.sendMessageData.contentType,
-        content: data.sendMessageData.content,
-        date: Date.now(),
-        reactions: [],
-        readedBy: [],
-      };
-      await saveMessage(
-        authedUserId,
-        {
-          $push: { "message.$[elem].message": messageData },
-        },
-        { arrayFilters: [{ "elem.userId": { $eq: data.targetUserId } }] }
-      );
-      socket.emit("sendMessageFromClientSuccess", {
-        targetUserId: data.targetUserId,
-        trackingMessageId,
-      });
-      for (targetUserIdSep of data.targetUserId) {
-        const userGroup = [...data.targetUserId, authedUserId].filter(
-          (item) => item !== targetUserIdSep
+      try {
+        console.log(data);
+        const trackingMessageId = data.sendMessageData.trackingMessageId;
+        const authedUserId = data.authedUserId;
+        const messageData = {
+          status: "success",
+          userId: authedUserId,
+          index: data.sendMessageData.index, //unstable
+          contentType: data.sendMessageData.contentType,
+          content: data.sendMessageData.content,
+          date: Date.now(),
+          reactions: [],
+          readedBy: [],
+        };
+        await saveMessage(
+          authedUserId,
+          {
+            $push: { "message.$[elem].message": messageData },
+          },
+          { arrayFilters: [{ "elem.userId": { $eq: data.targetUserId } }] }
         );
-        // check targetUser's contacts includes user
-        const targetUserContacts = await findUserById(targetUserIdSep, {
-          projection: { _id: 0, message: { userId: 1 } },
+        socket.emit("sendMessageFromClientSuccess", {
+          targetUserId: data.targetUserId,
+          trackingMessageId,
         });
-        if (
-          !targetUserContacts.message || //create "message" field
-          !targetUserContacts.message.filter(
-            (item) => JSON.stringify(item.userId) === `["${userGroup}"]`
-          ).length //check if contact exists
-        ) {
-          await findUserAndUpdate(targetUserIdSep, {
-            $push: { message: { userId: userGroup, message: [] } },
+        console.log('sent')
+        for (targetUserIdSep of data.targetUserId) {
+          const userGroup = [...data.targetUserId, authedUserId].filter(
+            (item) => item !== targetUserIdSep
+          );
+          // check targetUser's contacts includes user
+          const targetUserContacts = await findUserById(targetUserIdSep, {
+            projection: { _id: 0, message: { userId: 1 } },
           });
-        }
+          if (
+            !targetUserContacts.message || //create "message" field
+            !targetUserContacts.message.filter(
+              (item) => JSON.stringify(item.userId) === `["${userGroup}"]`
+            ).length //check if contact exists
+          ) {
+            await findUserAndUpdate(targetUserIdSep, {
+              $push: { message: { userId: userGroup, message: [] } },
+            });
+          }
 
-        if (onlineUsers.includes(targetUserIdSep)) {
-          saveMessage(
-            targetUserIdSep,
-            {
-              $push: {
-                "message.$[elem].message": {
-                  ...messageData,
-                  status: "delivered",
+          if (onlineUsers.includes(targetUserIdSep)) {
+            saveMessage(
+              targetUserIdSep,
+              {
+                $push: {
+                  "message.$[elem].message": {
+                    ...messageData,
+                    status: "delivered",
+                  },
                 },
               },
-            },
-            {
-              arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
-              upsert: true,
-            }
-          );
-          socket.to(targetUserIdSep + "SELF").emit("sendMessageFromOtherUser", {
-            targetUserId: userGroup,
-            sendMessageData: messageData,
-          });
-        } else {
-          saveMessage(
-            targetUserIdSep,
-            {
-              $push: {
-                "message.$[elem].message": {
-                  ...messageData,
-                  status: "undelivered",
+              {
+                arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+                upsert: true,
+              }
+            );
+            socket
+              .to(targetUserIdSep + "SELF")
+              .emit("sendMessageFromOtherUser", {
+                targetUserId: userGroup,
+                sendMessageData: messageData,
+              });
+          } else {
+            saveMessage(
+              targetUserIdSep,
+              {
+                $push: {
+                  "message.$[elem].message": {
+                    ...messageData,
+                    status: "undelivered",
+                  },
                 },
               },
-            },
-            {
-              arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
-              upsert: true,
-            }
-          );
+              {
+                arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+                upsert: true,
+              }
+            );
+          }
         }
-      }
+      } catch (err) {console.log(err)}
     });
   });
 

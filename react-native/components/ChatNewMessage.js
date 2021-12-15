@@ -236,13 +236,13 @@ const ChatNewMessage = () => {
             marginRight: 10,
             paddingBottom: 2, //visual center Icon
           }}
-          disabled={selectUsers.length !== 1} //only private chat now, will develop group chat
+          disabled={selectUsers.length === 0} //only private chat now, will develop group chat
           onPress={() => {
             if (
               !!message.filter(
                 (item) =>
-                  JSON.stringify(item.userId.sort()) ===
-                  JSON.stringify(selectUsers.sort())
+                  JSON.stringify([...item.userId].sort()) ===
+                  JSON.stringify([...selectUsers].sort())
               ).length
             ) {
               //contact already exists
@@ -251,7 +251,7 @@ const ChatNewMessage = () => {
             } else {
               //need to create contact
               (async () => {
-                await dispatch(createMessage(selectUsers[0]));
+                await dispatch(createMessage(selectUsers));
                 navigation.goBack();
                 navigation.push("ChatMessage", { contactId: selectUsers });
               })();
@@ -264,7 +264,7 @@ const ChatNewMessage = () => {
               {
                 fontWeight: "600",
                 color:
-                  selectUsers.length !== 1
+                  selectUsers.length === 0
                     ? styles.colors.subText
                     : styles.colors.text,
               },

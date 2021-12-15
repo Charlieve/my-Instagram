@@ -1,7 +1,7 @@
 
 # My-instagram
 
-🦃🦃Personal Building Instagram-clone By React-native, React-Navigation, expo, Nodejs
+🦃🦃Personal Building Instagram-clone By React-native, React-Navigation, Nodejs, expo, SocketIO
 
 
 ## 🖥️Installation
@@ -70,7 +70,8 @@ Animation
 - Like/Comment/Follow
 - Post preview
 - Bottom sheet (Feed action, switch account)
-- Chat/show user status
+- Private/Group chat
+- Show user status
 
 
 ## License

@@ -121,7 +121,7 @@ const ChatMessageInput = ({ contactId }) => {
       message.sendMessage({
         sendMessageData,
         contactIndex,
-        targetUserId: [contactId],
+        targetUserId: Array.isArray(contactId)?contactId:[contactId],
       });
       onChangeText("");
     }

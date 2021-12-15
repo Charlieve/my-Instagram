@@ -433,7 +433,6 @@ export default function createStyles() {
       backgroundColor: colors.chatBubble,
     },
     chatFontSelf: {
-      fontSize: 16,
       color: 'white',
     },
   });
