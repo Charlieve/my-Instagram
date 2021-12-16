@@ -94,11 +94,11 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
           targetUserId: data.targetUserId,
           trackingMessageId,
         });
-        console.log('sent')
+        console.log("sent");
         for (targetUserIdSep of data.targetUserId) {
-          const userGroup = [...data.targetUserId, authedUserId].filter(
-            (item) => item !== targetUserIdSep
-          );
+          const userGroup = [...data.targetUserId, authedUserId]
+            .filter((item) => item !== targetUserIdSep)
+            .sort();
           // check targetUser's contacts includes user
           const targetUserContacts = await findUserById(targetUserIdSep, {
             projection: { _id: 0, message: { userId: 1 } },
@@ -106,7 +106,8 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
           if (
             !targetUserContacts.message || //create "message" field
             !targetUserContacts.message.filter(
-              (item) => JSON.stringify(item.userId) === `["${userGroup}"]`
+              (item) =>
+                JSON.stringify(item.userId.sort()) === JSON.stringify(userGroup)
             ).length //check if contact exists
           ) {
             await findUserAndUpdate(targetUserIdSep, {
@@ -154,7 +155,9 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
             );
           }
         }
-      } catch (err) {console.log(err)}
+      } catch (err) {
+        console.log(err);
+      }
     });
   });
 

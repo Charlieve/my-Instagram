@@ -9,9 +9,10 @@ import {
   contactOffline,
   pushMessage,
   sendMessageSuccess,
-  receiveMessage
+  receiveMessage,
 } from "./messageSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { pushNotification } from "../notification/notificationSlice";
 
 const socket = io(GLOBAL.SERVERIP, { withCredentials: true });
 const messageState = store.getState().message;
@@ -63,6 +64,23 @@ const subscript = () => {
 
   socket.on("sendMessageFromOtherUser", (message) => {
     store.dispatch(receiveMessage(message));
+    const image = `${GLOBAL.SERVERIP}/users/${message.sendMessageData.userId}/userimage.png`;
+    const userIdStringify = (userId) => {
+      userId = Array.isArray(userId) ? userId : [userId];
+      return String(userId).length > 20 && userId.length > 1
+        ? `${String(userId[0]).replace(/(.{10})(.*)/, "$1...")} and ${
+            userId.length > 2
+              ? String(userId.length - 1) + " other users"
+              : String(userId[1]).replace(/(.{10})(.*)/, "$1...")
+          }`
+        : String(userId).replace(",", ", ");
+    };
+    const title = userIdStringify(message.targetUserId);
+    const content =
+      message.targetUserId.length > 1
+        ? `${message.sendMessageData.userId}: ${message.sendMessageData.content}`
+        : `${message.sendMessageData.content}`;
+    store.dispatch(pushNotification({image, title, content}));
   });
 };
 

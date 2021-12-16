@@ -33,6 +33,7 @@ import ActivityStackScreen from "./components/Activity";
 import ProfileStackScreen from "./components/Profile";
 
 import Welcome from "./components/Welcome";
+import Notification from "./components/Notification";
 
 // SOCKET.IO
 // import { io } from "socket.io-client";
@@ -52,6 +53,7 @@ const Theme = {
     ...DefaultTheme.colors,
     primary: "#0095f6",
     background: "white",
+    notificationBody: "rgba(225,225,225,0.95)",
     subText: "gray",
     subButton: "#eee",
     popup: "white",
@@ -59,7 +61,7 @@ const Theme = {
     warning: "#f44",
     smartButton: "#337bef",
     online: "#00cf00",
-    chatBubble: "#7351da"
+    chatBubble: "#7351da",
   },
 };
 
@@ -69,6 +71,7 @@ const ThemeDark = {
     ...DarkTheme.colors,
     primary: "#0095f6",
     background: "black",
+    notificationBody: "rgba(35,35,35,0.95)",
     card: "black",
     subButton: "#333",
     popup: "#111",
@@ -78,7 +81,7 @@ const ThemeDark = {
     warning: "#f44",
     smartButton: "#337bef",
     online: "#00cf00",
-    chatBubble: "#7351da"
+    chatBubble: "#7351da",
   },
 };
 
@@ -311,6 +314,7 @@ function App1() {
                 })}
               />
             </Stack.Navigator>
+            <Notification />
           </NavigationContainer>
         </View>
       </View>

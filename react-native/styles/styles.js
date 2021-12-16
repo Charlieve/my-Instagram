@@ -411,7 +411,7 @@ export default function createStyles() {
       paddingLeft: 12,
       paddingRight: 12,
       paddingBottom: 60,
-      flexDirection: 'column',
+      flexDirection: "column",
     },
 
     chatBubble: {
@@ -433,7 +433,33 @@ export default function createStyles() {
       backgroundColor: colors.chatBubble,
     },
     chatFontSelf: {
-      color: 'white',
+      color: "white",
+    },
+
+    notificationContainer: {
+      position: "absolute",
+      width: "100%",
+      alignItems: "center",
+    },
+    notificationBody: {
+      padding: 10,
+      paddingRight: 20,
+      paddingLeft: 20,
+      flexDirection: "row",
+      backgroundColor: colors.notificationBody,
+      maxWidth: 500,
+      borderRadius: 10,
+      width: "95%",
+    },
+    notificationImage: {
+      height: 60,
+      width: 60,
+      borderRadius: 50,
+      marginRight: 15,
+    },
+    notificationContent: {
+      flex: 1,
+      justifyContent: "center",
     },
   });
   const style = { colors, css };

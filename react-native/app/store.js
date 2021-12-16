@@ -3,6 +3,7 @@ import testReducer from "../features/test/TestSlice";
 import userReducer from "../features/user/userSlice";
 import feedsReducer from "../features/feeds/feedsSlice";
 import messageReducer from "../features/message/messageSlice";
+import notificationReducer from "../features/notification/notificationSlice";
 
 export default configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export default configureStore({
     user: userReducer,
     feeds: feedsReducer,
     message: messageReducer,
+    notification: notificationReducer
   },
 });
