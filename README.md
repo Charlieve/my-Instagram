@@ -72,6 +72,7 @@ Animation
 - Bottom sheet (Feed action, switch account)
 - Private/Group chat
 - Show user status
+- In-App notification
 
 
 ## License
