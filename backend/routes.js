@@ -544,7 +544,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
         reject("Invalid User ID");
       }
       const userId = req.body.userId;
-      const targetIdArr = req.body.targetIdArr;
+      const targetIdArr = req.body.targetIdArr.sort();
       const userContacts = await findUserById(userId, {
         projection: { _id: 0, message: { userId: 1 } },
       });
@@ -575,7 +575,7 @@ module.exports = function (app, DBUsers, DBPosts, DBPostContents) {
         reject("Invalid User ID");
       }
       const userId = req.body.userId;
-      const targetId = req.body.targetId;
+      const targetId = req.body.targetId.sort();
       const userContacts = await findUserById(userId, {
         projection: { _id: 0, message: { userId: 1 } },
       });

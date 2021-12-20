@@ -251,9 +251,9 @@ const ChatNewMessage = () => {
             } else {
               //need to create contact
               (async () => {
-                await dispatch(createMessage(selectUsers));
+                await dispatch(createMessage(selectUsers.sort()));
                 navigation.goBack();
-                navigation.push("ChatMessage", { contactId: selectUsers });
+                navigation.push("ChatMessage", { contactId: selectUsers.sort() });
               })();
             }
           }}

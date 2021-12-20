@@ -45,6 +45,7 @@ export default function UserIconImage({ userId, aspectRatio = 1 }) {
           userId={userId[i]}
           queue={i}
           qty={Math.min(4, userId.length)}
+          key={`userImage-${i}-id:${userId[i]}`}
         />
       );
     }

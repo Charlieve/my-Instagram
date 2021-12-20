@@ -107,14 +107,14 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
             !targetUserContacts.message || //create "message" field
             !targetUserContacts.message.filter(
               (item) =>
-                JSON.stringify(item.userId.sort()) === JSON.stringify(userGroup)
+                JSON.stringify(item.userId.sort()) === JSON.stringify(userGroup.sort())
             ).length //check if contact exists
           ) {
             await findUserAndUpdate(targetUserIdSep, {
-              $push: { message: { userId: userGroup, message: [] } },
+              $push: { message: { userId: userGroup.sort(), message: [] } },
             });
           }
-
+          console.log(userGroup.sort())
           if (onlineUsers.includes(targetUserIdSep)) {
             saveMessage(
               targetUserIdSep,
@@ -127,7 +127,7 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
                 },
               },
               {
-                arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+                arrayFilters: [{ "elem.userId": { $eq: userGroup.sort() } }],
                 upsert: true,
               }
             );
@@ -149,7 +149,7 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
                 },
               },
               {
-                arrayFilters: [{ "elem.userId": { $eq: userGroup } }],
+                arrayFilters: [{ "elem.userId": { $eq: userGroup.sort() } }],
                 upsert: true,
               }
             );

@@ -46,6 +46,14 @@ const sendMessage = (message) => {
 };
 
 const subscript = () => {
+  socket.on("connect", () => {
+    // reconnect action below
+    if (store.getState().message.status === "succeeded") {
+      console.log("reconnect")
+      online(store.getState().message.userId)
+    }
+  });
+
   socket.on("greeting", (data) => {
     console.log(data);
   });
@@ -80,7 +88,7 @@ const subscript = () => {
       message.targetUserId.length > 1
         ? `${message.sendMessageData.userId}: ${message.sendMessageData.content}`
         : `${message.sendMessageData.content}`;
-    store.dispatch(pushNotification({image, title, content}));
+    store.dispatch(pushNotification({ image, title, content }));
   });
 };
 

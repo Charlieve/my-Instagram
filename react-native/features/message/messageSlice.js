@@ -161,7 +161,7 @@ const messageSlice = createSlice({
         //     userId: state.userId,
         //   },
         // });
-        const updatedContacts = state.contacts.slice().sort;
+        const updatedContacts = state.contacts.slice().sort();
         for (const userId of targetUserId) {
           const userIdArr = Array.isArray(userId) ? userId : [userId];
           updatedContacts.push({ userId: userIdArr.sort(), online: true });
@@ -192,9 +192,9 @@ const messageSlice = createSlice({
       state.contacts = contactsObjectsArr;
     },
     [createMessage.fulfilled]: (state, action) => {
-      state.contacts.push({ userId: action.payload.userId, online: false });
+      state.contacts.push({ userId: action.payload.userId.sort(), online: false });
       state.data.push({
-        userId: action.payload.userId,
+        userId: action.payload.userId.sort(),
         message: [],
       });
     },

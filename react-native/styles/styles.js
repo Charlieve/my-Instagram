@@ -384,8 +384,6 @@ export default function createStyles() {
       fontSize: 16,
       paddingTop: 5,
       paddingBottom: 5,
-      marginTop: 3,
-      marginBottom: 3,
     },
 
     userOnlineDotBackground: {
@@ -413,13 +411,24 @@ export default function createStyles() {
       paddingBottom: 60,
       flexDirection: "column",
     },
+    chatMessageSection: {
+      paddingTop: 10,
+      paddingBottom: 10,
+      flexDirection: "column",
+    },
+    chatMessageDateSection: {
+      width: "100%",
+      alignItems: "center",
+      padding: 20,
+    },
 
     chatBubble: {
       padding: 10,
       backgroundColor: colors.border,
-      borderRadius: 20,
-      marginTop: 5,
-      marginBottom: 5,
+      // borderRadius: 20,
+      borderRadius: 3,
+      marginTop: 1,
+      marginBottom: 1,
       width: "auto",
       minHeight: 40,
       minWidth: 40,
@@ -429,8 +438,14 @@ export default function createStyles() {
       fontSize: 16,
       color: colors.text,
     },
+    chatBubbleOther:{
+      borderTopRightRadius:20,
+      borderBottomRightRadius:20,
+    },
     chatBubbleSelf: {
       backgroundColor: colors.chatBubble,
+      borderTopLeftRadius:20,
+      borderBottomLeftRadius:20,
     },
     chatFontSelf: {
       color: "white",
