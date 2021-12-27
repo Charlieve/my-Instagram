@@ -96,7 +96,7 @@ const TypingButton = (props) => {
 };
 
 const ChatMessageInput = ({ contactId }) => {
-  const { messageData, contactIndex } = useContext(ChatMessageContext);
+  const { messageData, contactIndex, reacting } = useContext(ChatMessageContext);
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const typing = useRef(new Animated.Value(0)).current;

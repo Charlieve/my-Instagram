@@ -1,5 +1,19 @@
-import React, { useContext } from "react";
-import { ScrollView, View, Text, SectionList } from "react-native";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+} from "react";
+import {
+  ScrollView,
+  View,
+  Text,
+  SectionList,
+  Animated,
+  Pressable,
+} from "react-native";
 import { ChatMessageContext } from "./ChatMessageContext";
 import createStyles from "../styles/styles";
 import { useSelector } from "react-redux";
@@ -9,57 +23,187 @@ import UserIconImage from "./UserIconImage";
 import TimeAgo from "./TimeAgo";
 import DateShort from "./DateShort";
 
+const DateSectionContext = createContext();
+const UserSectionContext = createContext();
+const StatusSectionContext = createContext();
+
+const ChatBubbleView = (props) => {
+  if (props.cellKey.match(/header|footer/g)) {
+    return <View />;
+  } else {
+    const index = props.index;
+    const totalQty = props.parentProps.data[0].data.length;
+    const styles = createStyles();
+    const userId = useSelector(selectUserId);
+    const message = props.item;
+    const myMessage = message.userId === userId;
+    const progress = useRef(new Animated.Value(0)).current;
+    const [isExpended, setExpended] = useState(false);
+    const { setDateSectionHighlight } = useContext(DateSectionContext);
+    const { setUserSectionHighlight } = useContext(UserSectionContext);
+    const { setStatusSectionHighlight } = useContext(StatusSectionContext);
+    // const { setReacting } = useContext(ChatMessageContext);
+    const expend = () => {
+      setExpended(false);
+      setDateSectionHighlight(false);
+      setUserSectionHighlight(false);
+      setStatusSectionHighlight(false);
+      // setReacting(false);
+    };
+    const closeExpended = () => {
+      setExpended(true);
+      setDateSectionHighlight(true);
+      setUserSectionHighlight(true);
+      setStatusSectionHighlight(true);
+      // setReacting(true);
+    };
+    const pressProgress = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+      if (isExpended) {
+        Animated.timing(progress, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+      } else {
+        Animated.timing(progress, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+      }
+    }, [isExpended]);
+    return useMemo(
+      () => (
+        <View
+          style={[
+            {
+              flexDirection: myMessage ? "row-reverse" : "row",
+            },
+            index === 1 && { marginTop: 5 },
+            index === totalQty && { marginBottom: 5 },
+            isExpended && { zIndex: 100 },
+          ]}
+        >
+          <View
+            style={{
+              maxWidth: "70%",
+              flexDirection: myMessage ? "row-reverse" : "row",
+              alignItems: "flex-end",
+            }}
+          >
+            {!myMessage && (
+              <View style={{ width: 30, height: 30, marginRight: 10 }}>
+                {index === totalQty && (
+                  <UserIconImage userId={message.userId} />
+                )}
+              </View>
+            )}
+            <Animated.View
+              style={[
+                {
+                  position: "absolute",
+                  backgroundColor: "black",
+                  width: 999999,
+                  height: 999999,
+                  top: -50000,
+                  left: -50000,
+                },
+                { display: isExpended === false ? "none" : "flex" },
+                {
+                  opacity: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.7],
+                  }),
+                },
+              ]}
+            >
+              <Pressable
+                style={{ width: "100%", height: "100%" }}
+                onPress={() => expend()}
+              />
+            </Animated.View>
+            <Pressable
+              onPressIn={() => {
+                Animated.timing(pressProgress, {
+                  toValue: 1,
+                  useNativeDriver: false,
+                }).start();
+              }}
+              onPressOut={() => {
+                Animated.spring(pressProgress, {
+                  toValue: 0,
+                  friction: 4,
+                  useNativeDriver: false,
+                }).start();
+              }}
+              onLongPress={() => {
+                Animated.spring(pressProgress, {
+                  toValue: 0,
+                  friction: 4,
+                  useNativeDriver: false,
+                }).start();
+                closeExpended();
+              }}
+            >
+              <Animated.View
+                style={[
+                  styles.css.chatBubble,
+                  myMessage
+                    ? styles.css.chatBubbleSelf
+                    : styles.css.chatBubbleOther,
+                  index === 1 && {
+                    borderTopRightRadius: 20,
+                    borderTopLeftRadius: 20,
+                  },
+                  index === totalQty && {
+                    borderBottomRightRadius: 20,
+                    borderBottomLeftRadius: 20,
+                  },
+                  message.status === "pending" && { opacity: 0.7 },
+                  {
+                    transform: [
+                      {
+                        scale: pressProgress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 0.85],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                {props.children}
+              </Animated.View>
+            </Pressable>
+          </View>
+        </View>
+      ),
+      [isExpended, props]
+    );
+  }
+};
+
 const ChatBubble = ({ message, index, totalQty }) => {
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const myMessage = message.userId === userId;
+  const progress = useRef(new Animated.Value(0)).current;
+  const [isExpended, setExpended] = useState(false);
+  useEffect(() => {
+    // progress.addListener((value) => {
+    //   if (value === 0) {
+    //     isExpended.current = false;
+    //   } else {
+    //     isExpended.current = true;
+    //   }
+    // });
+  });
   return (
-    <View
-      style={[
-        {
-          flexDirection: myMessage ? "row-reverse" : "row",
-        },
-        index === 0 && { marginTop: 5 },
-        index + 1 === totalQty && { marginBottom: 5 },
-      ]}
-    >
-      <View
-        style={{
-          maxWidth: "70%",
-          flexDirection: myMessage ? "row-reverse" : "row",
-          alignItems: "flex-end",
-        }}
-      >
-        {!myMessage && (
-          <View style={{ width: 30, height: 30, marginRight: 10 }}>
-            {index + 1 === totalQty && (
-              <UserIconImage userId={message.userId} />
-            )}
-          </View>
-        )}
-        <View
-          style={[
-            styles.css.chatBubble,
-            myMessage ? styles.css.chatBubbleSelf : styles.css.chatBubbleOther,
-            index === 0 && {
-              borderTopRightRadius: 20,
-              borderTopLeftRadius: 20,
-            },
-            index + 1 === totalQty && {
-              borderBottomRightRadius: 20,
-              borderBottomLeftRadius: 20,
-            },
-            message.status === "pending" && { opacity: 0.7 },
-          ]}
-        >
-          <Text
-            style={[styles.css.chatFont, myMessage && styles.css.chatFontSelf]}
-          >
-            {message.content}
-          </Text>
-        </View>
-      </View>
-    </View>
+    <Text style={[styles.css.chatFont, myMessage && styles.css.chatFontSelf]}>
+      {/* {message.content} */}
+      {Math.random()}
+    </Text>
   );
 };
 
@@ -170,15 +314,17 @@ const Sectioning = (messageData) => {
       }
     }
   }
-  console.log(result);
+  // console.log(result);
   return result;
 };
 
 const StatusSection = ({ messageDataSectionStatus }) => {
   const styles = createStyles();
+  console.log('re')
   return (
     <SectionList
       sections={messageDataSectionStatus}
+      CellRendererComponent={ChatBubbleView}
       renderItem={({ item, index, section }) => (
         <ChatBubble
           message={item}
@@ -197,9 +343,22 @@ const StatusSection = ({ messageDataSectionStatus }) => {
 
 const UserSection = ({ messageDataSectionUserId }) => {
   const styles = createStyles();
+  const createStatusSection = (props) => {
+    const { setDateSectionHighlight } = useContext(DateSectionContext);
+    const { setUserSectionHighlight } = useContext(UserSectionContext);
+    const [statusSectionHighlight, setStatusSectionHighlight] = useState(false);
+    return (
+      <StatusSectionContext.Provider value={{ setStatusSectionHighlight }}>
+        <View style={[statusSectionHighlight && { zIndex: 100 }]}>
+          {props.children}
+        </View>
+      </StatusSectionContext.Provider>
+    );
+  };
   return (
     <SectionList
       sections={messageDataSectionUserId}
+      CellRendererComponent={createStatusSection}
       renderItem={({ item }) => (
         <StatusSection messageDataSectionStatus={item} />
       )}
@@ -214,9 +373,21 @@ const UserSection = ({ messageDataSectionUserId }) => {
 
 const DateSection = ({ messageDataSectionDate }) => {
   const styles = createStyles();
+  const createUserSection = (props) => {
+    const { setDateSectionHighlight } = useContext(DateSectionContext);
+    const [userSectionHighlight, setUserSectionHighlight] = useState(false);
+    return (
+      <UserSectionContext.Provider value={{ setUserSectionHighlight }}>
+        <View style={[userSectionHighlight && { zIndex: 100 }]}>
+          {props.children}
+        </View>
+      </UserSectionContext.Provider>
+    );
+  };
   return (
     <SectionList
       sections={messageDataSectionDate}
+      CellRendererComponent={createUserSection}
       renderItem={({ item }) => <UserSection messageDataSectionUserId={item} />}
       // renderSectionHeader={({ section: { userId } }) => (
       //   <Text style={styles.css.normalFont}>{userId}</Text>
@@ -241,20 +412,44 @@ Structure
 const ChatMessageContent = ({ contactId }) => {
   const styles = createStyles();
   const { messageData, contactIndex } = useContext(ChatMessageContext);
-  const messageDataSectionDate = Sectioning(messageData);
-  return (
-    <SectionList
-      sections={messageDataSectionDate}
-      renderItem={({ item }) => <DateSection messageDataSectionDate={item} />}
-      renderSectionHeader={({ section: { date } }) => (
-        <DateSectionTitle date={date} />
-      )}
-      stickySectionHeadersEnabled={false}
-      keyExtractor={(item, index) => "messageDate" + index}
-      contentContainerStyle={styles.css.chatMessageContainer}
-      ListHeaderComponent={<ChatMessageHeaderUserInfo contactId={contactId} />}
-      // inverted={-1}
-    />
+  const messageDataSectionDate = useMemo(
+    () => Sectioning(messageData),
+    [messageData]
+  );
+  const createDateSection = (props) => {
+    const [dateSectionHighlight, setDateSectionHighlight] = useState(false);
+    return (
+      <DateSectionContext.Provider value={{ setDateSectionHighlight }}>
+        <View
+          style={[
+            { transform: [{ scaleY: -1 }] }, //inverted
+            dateSectionHighlight && { zIndex: 100 },
+          ]}
+        >
+          {props.children}
+        </View>
+      </DateSectionContext.Provider>
+    );
+  };
+  return useMemo(
+    () => (
+      <SectionList
+        sections={messageDataSectionDate.reverse()}
+        CellRendererComponent={createDateSection}
+        renderItem={({ item }) => <DateSection messageDataSectionDate={item} />}
+        renderSectionFooter={({ section: { date } }) => (
+          <DateSectionTitle date={date} />
+        )}
+        keyExtractor={(item, index) => "messageDate" + index}
+        contentContainerStyle={styles.css.chatMessageContainer}
+        ListFooterComponent={
+          <ChatMessageHeaderUserInfo contactId={contactId} />
+        }
+        initialScrollIndex={0}
+        inverted={-1}
+      />
+    ),
+    [messageData, contactId]
   );
 };
 

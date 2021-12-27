@@ -28,7 +28,6 @@ const ChatMessageSingle = ({ contactId }) => {
           styles.css.custumizeHeader,
           {
             alignItems: "center",
-            marginBottom: 5,
             height: 55,
             paddingRight: 5,
           },

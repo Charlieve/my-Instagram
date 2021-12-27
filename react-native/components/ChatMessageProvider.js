@@ -11,20 +11,38 @@ import {
 import { ChatMessageContext } from "./ChatMessageContext";
 import ChatMessageContent from "./ChatMessageContent";
 import ChatMessageInput from "./ChatMessageInput";
+import ChatMessageReactionBottom from "./ChatMessageReactionBottom";
 
-const ChatMessageProvider = ({ contactId }) => {
-  const userId = useSelector(selectUserId);
+const ChatMessageProviderComponent = (props) => {
+  const {contactId} = props
   const [inputContent, onChangeText] = useState("");
+  const [reacting, setReacting] = useState(false);
   const contactIndex = useSelector((state) =>
     selectMessageIndexByUserId(state, contactId)
   );
   const messageData = useSelector((state) =>
     selectMessageByIndex(state, contactIndex)
   );
-  // console.log(messageData);
   return (
     <ChatMessageContext.Provider
-      value={{ inputContent, onChangeText, messageData, contactIndex }}
+      value={{
+        inputContent,
+        onChangeText,
+        messageData,
+        contactIndex,
+        reacting,
+        setReacting,
+      }}
+    >
+      {props.children}
+    </ChatMessageContext.Provider>
+  );
+};
+
+const ChatMessageProvider = ({ contactId }) => {
+  const userId = useSelector(selectUserId);
+  return (
+    <ChatMessageProviderComponent contactId={contactId}
     >
       <KeyboardAvoidingView
         behavior={
@@ -40,9 +58,10 @@ const ChatMessageProvider = ({ contactId }) => {
         <View style={{ flex: 1, justifyContent: "space-around" }}>
           <ChatMessageContent contactId={contactId} />
           <ChatMessageInput contactId={contactId} />
+          <ChatMessageReactionBottom contactId={contactId} />
         </View>
       </KeyboardAvoidingView>
-    </ChatMessageContext.Provider>
+    </ChatMessageProviderComponent>
   );
 };
 
