@@ -386,17 +386,16 @@ export default function createStyles() {
       paddingBottom: 5,
     },
 
-    
     messageReactionBottomComponent: {
       position: "absolute",
       bottom: 0,
       width: "100%",
     },
     messageReactionBottomButton: {
-      flex:1,
-      padding:20,
+      flex: 1,
+      padding: 17,
       backgroundColor: colors.border,
-      alignItems: "center"
+      alignItems: "center",
     },
 
     userOnlineDotBackground: {
@@ -421,7 +420,7 @@ export default function createStyles() {
     chatMessageContainer: {
       paddingLeft: 12,
       paddingRight: 12,
-      flexDirection: "column",
+      flexDirection: "column-reverse",
       paddingTop: 60,
     },
     chatMessageSection: {
@@ -462,6 +461,25 @@ export default function createStyles() {
     },
     chatFontSelf: {
       color: "white",
+    },
+
+    chatEmojiReactionContainer: {
+      position: "absolute",
+    },
+    chatEmojiReactionComponent: {
+      backgroundColor: colors.border,
+      shadowColor: "black",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.5,
+      shadowRadius: 2,
+      elevation: 5,
+      flexDirection: "row",
+      justifyContent: "space-around",
+      paddingHorizontal:10,
+      borderRadius:50,
+    },
+    chatEmojiButton:{
+      padding:8
     },
 
     notificationContainer: {

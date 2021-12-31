@@ -12,11 +12,12 @@ import { ChatMessageContext } from "./ChatMessageContext";
 import ChatMessageContent from "./ChatMessageContent";
 import ChatMessageInput from "./ChatMessageInput";
 import ChatMessageReactionBottom from "./ChatMessageReactionBottom";
+import ChatMessageReactionEmoji from "./ChatMessageReactionEmoji";
 
 const ChatMessageProviderComponent = (props) => {
-  const {contactId} = props
+  const { contactId } = props;
   const [inputContent, onChangeText] = useState("");
-  const [reacting, setReacting] = useState(false);
+  const [reacting, setReacting] = useState({display:false});
   const contactIndex = useSelector((state) =>
     selectMessageIndexByUserId(state, contactId)
   );
@@ -42,8 +43,7 @@ const ChatMessageProviderComponent = (props) => {
 const ChatMessageProvider = ({ contactId }) => {
   const userId = useSelector(selectUserId);
   return (
-    <ChatMessageProviderComponent contactId={contactId}
-    >
+    <ChatMessageProviderComponent contactId={contactId}>
       <KeyboardAvoidingView
         behavior={
           Platform?.OS === "ios"
@@ -59,6 +59,7 @@ const ChatMessageProvider = ({ contactId }) => {
           <ChatMessageContent contactId={contactId} />
           <ChatMessageInput contactId={contactId} />
           <ChatMessageReactionBottom contactId={contactId} />
+          <ChatMessageReactionEmoji contactId={contactId} />
         </View>
       </KeyboardAvoidingView>
     </ChatMessageProviderComponent>

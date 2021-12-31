@@ -10,7 +10,7 @@ const ChatMessageReactionBottom = ({ contactId }) => {
 
   const progress = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    if (reacting) {
+    if (reacting.display) {
       Animated.timing(progress, {
         toValue: 1,
         duration: 200,
@@ -23,7 +23,7 @@ const ChatMessageReactionBottom = ({ contactId }) => {
         useNativeDriver: false,
       }).start();
     }
-  }, [reacting]);
+  }, [reacting.display]);
   return (
     <Animated.View
       style={[

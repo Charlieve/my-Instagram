@@ -96,12 +96,14 @@ const TypingButton = (props) => {
 };
 
 const ChatMessageInput = ({ contactId }) => {
-  const { messageData, contactIndex, reacting } = useContext(ChatMessageContext);
+  const { messageData, contactIndex, reacting } =
+    useContext(ChatMessageContext);
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const typing = useRef(new Animated.Value(0)).current;
   const showAllButtons = useRef(new Animated.Value(0)).current;
   const [inputContent, onChangeText] = useState("");
+
   // SEND MESSAGE ACTION
 
   const sendMessage = (content) => {
@@ -121,7 +123,7 @@ const ChatMessageInput = ({ contactId }) => {
       message.sendMessage({
         sendMessageData,
         contactIndex,
-        targetUserId: Array.isArray(contactId)?contactId:[contactId],
+        targetUserId: Array.isArray(contactId) ? contactId : [contactId],
       });
       onChangeText("");
     }
@@ -144,8 +146,39 @@ const ChatMessageInput = ({ contactId }) => {
     }
   }, [inputContent]);
 
+  const progress = useRef(new Animated.Value(1)).current; //show and hide input
+  useEffect(() => {
+    if (reacting.display) {
+      Animated.timing(progress, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [reacting.display]);
+
   return (
-    <View style={styles.css.messageInputComponent}>
+    <Animated.View
+      style={[
+        styles.css.messageInputComponent,
+        {
+          transform: [
+            {
+              translateY: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [70, 0],
+              }),
+            },
+          ],
+        },
+      ]}
+    >
       <View
         style={{
           position: "absolute",
@@ -359,7 +392,7 @@ const ChatMessageInput = ({ contactId }) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

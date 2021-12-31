@@ -16,7 +16,7 @@ const DateShort = ({ timestamp, style }) => {
       result = format(timestamp, "HH:mm");
       break;
     case isYesterday(timestamp):
-      result = "Yesterday " + format(timestamp, "EEE HH:mm");
+      result = "Yesterday " + format(timestamp, " HH:mm");
       break;
     case isThisWeek(timestamp):
       result = format(timestamp, "EEE HH:mm");
