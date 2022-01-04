@@ -70,18 +70,17 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
 
     socket.on("sendMessageFromClient", async (data) => {
       try {
-        console.log(data);
         const trackingMessageId = data.sendMessageData.trackingMessageId;
         const authedUserId = data.authedUserId;
         const messageData = {
           status: "success",
           userId: authedUserId,
-          index: data.sendMessageData.index, //unstable
+          index: data.sendMessageData.index, //unstable, need to gen a unique id ; no get from request, and send back and update
           contentType: data.sendMessageData.contentType,
           content: data.sendMessageData.content,
           date: Date.now(),
-          reactions: [],
-          readedBy: [],
+          reactions: {},
+          readedBy: {},
         };
         await saveMessage(
           authedUserId,
@@ -94,7 +93,6 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
           targetUserId: data.targetUserId,
           trackingMessageId,
         });
-        console.log("sent");
         for (targetUserIdSep of data.targetUserId) {
           const userGroup = [...data.targetUserId, authedUserId]
             .filter((item) => item !== targetUserIdSep)
@@ -107,14 +105,14 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
             !targetUserContacts.message || //create "message" field
             !targetUserContacts.message.filter(
               (item) =>
-                JSON.stringify(item.userId.sort()) === JSON.stringify(userGroup.sort())
+                JSON.stringify(item.userId.sort()) ===
+                JSON.stringify(userGroup.sort())
             ).length //check if contact exists
           ) {
             await findUserAndUpdate(targetUserIdSep, {
               $push: { message: { userId: userGroup.sort(), message: [] } },
             });
           }
-          console.log(userGroup.sort())
           if (onlineUsers.includes(targetUserIdSep)) {
             saveMessage(
               targetUserIdSep,
@@ -153,6 +151,69 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
                 upsert: true,
               }
             );
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    socket.on("sendMessageReactionFromClient", async (data) => {
+      try {
+        console.log(data);
+        const authedUserId = data.authedUserId;
+        const authedUserIdWithOutDot = authedUserId.replace(".", "#"); //got bug if mongodb's objects key name with DOT
+        await saveMessage(
+          authedUserId,
+          {
+            $set: {
+              ["message.$[elem].message.$[message].reactions." +
+              authedUserIdWithOutDot]: data.emoji,
+            },
+          },
+          {
+            arrayFilters: [
+              {
+                "elem.userId": { $eq: data.targetUserId },
+              },
+              {
+                "message.index": { $eq: data.messageIndex },
+              },
+            ],
+          }
+        );
+        for (targetUserIdSep of data.targetUserId) {
+          const userGroup = [...data.targetUserId, authedUserId]
+            .filter((item) => item !== targetUserIdSep)
+            .sort();
+          const updatedUser = await saveMessage(
+            targetUserIdSep,
+            {
+              $set: {
+                ["message.$[elem].message.$[message].reactions." +
+                authedUserIdWithOutDot]: data.emoji,
+              },
+            },
+            {
+              arrayFilters: [
+                {
+                  "elem.userId": { $eq: userGroup },
+                },
+                {
+                  "message.index": { $eq: data.messageIndex },
+                },
+              ],
+            }
+          );
+          if (onlineUsers.includes(targetUserIdSep)) {
+            socket
+              .to(targetUserIdSep + "SELF")
+              .emit("sendMessageReactionFromOtherUser", {
+                targetUserId: userGroup,
+                messageIndex: data.messageIndex,
+                userId: authedUserId,
+                emoji : data.emoji
+              });
           }
         }
       } catch (err) {

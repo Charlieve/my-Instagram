@@ -442,9 +442,10 @@ export default function createStyles() {
       marginTop: 1,
       marginBottom: 1,
       width: "auto",
-      minHeight: 40,
       minWidth: 40,
+      justifyContent: "center",
       alignItems: "center",
+      flexDirection: "row"
     },
     chatFont: {
       fontSize: 16,
@@ -461,6 +462,22 @@ export default function createStyles() {
     },
     chatFontSelf: {
       color: "white",
+    },
+    chatBubbleReactionContainer:{
+      position: "absolute",
+      backgroundColor: colors.border,
+      padding:5,
+      borderRadius: 50,
+      borderWidth: 2,
+      borderColor: colors.background,
+      bottom: -17,
+      left:5,
+      flexDirection: "row",
+    },
+    chatBubbleReactionEmoji:{
+      fontSize:12,
+      width:"auto",
+      minWidth:16
     },
 
     chatEmojiReactionContainer: {

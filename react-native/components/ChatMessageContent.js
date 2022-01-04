@@ -59,13 +59,17 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
       checkedMessage.date + min > message.date;
     return sameUserId && sameStatus && sendInMin;
   };
+  const haveReaction = Object.keys(message.reactions).length !== 0;
 
   const isFirst =
-    index === 0 || !checkMessageinSameSection(message, section.data[index - 1]);
+    index === 0 ||
+    !checkMessageinSameSection(message, section.data[index - 1]) ||
+    Object.keys(section.data[index - 1].reactions).length !== 0;
 
   const isLast =
     index === totalQty - 1 ||
-    !checkMessageinSameSection(message, section.data[index + 1]);
+    !checkMessageinSameSection(message, section.data[index + 1]) ||
+    haveReaction;
 
   const myMessage = message.userId === userId;
 
@@ -74,16 +78,16 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
   const progress = useRef(new Animated.Value(0)).current;
   const pressProgress = useRef(new Animated.Value(0)).current;
 
-  const expend = ({pageX,pageY}) => {
-    const touchPoint = {x: pageX, y: pageY};
+  const expend = ({ pageX, pageY }) => {
+    const touchPoint = { x: pageX, y: pageY };
     setExpended(true);
     setHighlight(true);
-    setReacting({display:true,touchPoint});
+    setReacting({ display: true, touchPoint, message });
   };
   const closeExpended = () => {
     setExpended(false);
     setHighlight(false);
-    setReacting({display:false});
+    setReacting({ display: false });
   };
   useEffect(() => {
     if (isExpended) {
@@ -109,6 +113,7 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
         },
         isFirst && { marginTop: 5 },
         isLast && { marginBottom: 5 },
+        haveReaction && { marginBottom: 15 },
       ]}
     >
       <View
@@ -165,7 +170,7 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
               useNativeDriver: false,
             }).start();
           }}
-          onLongPress={({nativeEvent}) => {
+          onLongPress={({ nativeEvent }) => {
             Animated.spring(pressProgress, {
               toValue: 0,
               friction: 4,
@@ -201,19 +206,73 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
               },
             ]}
           >
-            <Text
-              style={[
-                styles.css.chatFont,
-                myMessage && styles.css.chatFontSelf,
-              ]}
-            >
-              {message.content}
-            </Text>
+            {useMemo(
+              () => (
+                <ChatBubbleContent message={message} myMessage={myMessage} />
+              ),
+              [message]
+            )}
+            {useMemo(
+              () => (
+                <ChatBubbleReaction
+                  reactions={message.reactions}
+                  myMessage={myMessage}
+                />
+              ),
+              [message.reactions]
+            )}
           </Animated.View>
         </Pressable>
       </View>
     </View>
   );
+};
+
+const ChatBubbleContent = ({ message, myMessage }) => {
+  const styles = createStyles();
+  return (
+    <View>
+      <Text style={[styles.css.chatFont, myMessage && styles.css.chatFontSelf]}>
+        {message.content}
+      </Text>
+    </View>
+  );
+};
+
+const ChatBubbleReaction = ({ reactions, myMessage }) => {
+  const styles = createStyles();
+  const userId = useSelector(selectUserId);
+  const reactionsAnalyst = {};
+  for (const [user, reaction] of Object.entries(reactions)) {
+    reactionsAnalyst[reaction] = Array.isArray(reactionsAnalyst[reactions])
+      ? reactionsAnalyst[reaction].push(user)
+      : [user];
+  }
+  const reactionsText = [];
+  for (const [reaction, users] of Object.entries(reactionsAnalyst)) {
+    reactionsText.push(
+      <View key={"reaction:" + reaction}>
+        <Text numberOfLines={1} style={styles.css.chatBubbleReactionEmoji}>
+          {reaction}
+        </Text>
+        {users.length > 1 && <Text>users.length</Text>}
+      </View>
+    );
+  }
+  if (Object.keys(reactionsAnalyst).length > 0) {
+    return (
+      <View
+        style={[
+          styles.css.chatBubbleReactionContainer,
+          // myMessage && { backgroundColor: styles.colors.chatBubble },
+        ]}
+      >
+        {reactionsText}
+      </View>
+    );
+  } else {
+    return <View />;
+  }
 };
 
 const ChatBubbleView = () => {

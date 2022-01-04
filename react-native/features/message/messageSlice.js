@@ -174,6 +174,38 @@ const messageSlice = createSlice({
         state.data = updatedState;
       }
     },
+    updateMessageReaction(state, action) {
+      const updatedState = state.data.slice();
+
+      const contactIndex =
+        typeof action.payload.contactIndex === "number"
+          ? action.payload.contactIndex //if contactIndex not exists that means it is received message
+          : updatedState // find index
+              .map((item) => item.userId.sort())
+              .findIndex(
+                (item) =>
+                  JSON.stringify(item) ===
+                  JSON.stringify(action.payload.targetUserId.sort())
+              );
+      if (contactIndex !== -1) { //if have contact
+
+        const messageIndex = action.payload.messageIndex;
+        const reactionEmoji = action.payload.emoji;
+        const updatedMessageStateIndex = updatedState[
+          contactIndex
+        ].message.findIndex((item) => item.index === messageIndex);
+
+        if (updatedMessageStateIndex !== -1) { //if did not delete message
+          const updatedMessageState = updatedState[contactIndex];
+          const updatedMessage =
+            updatedMessageState.message[updatedMessageStateIndex];
+
+          updatedMessage.reactions[action.payload.userId] = reactionEmoji;
+
+          state.data = updatedState;
+        }
+      }
+    },
   },
   extraReducers: {
     [fetchMessage.pending]: (state, action) => {
@@ -192,7 +224,10 @@ const messageSlice = createSlice({
       state.contacts = contactsObjectsArr;
     },
     [createMessage.fulfilled]: (state, action) => {
-      state.contacts.push({ userId: action.payload.userId.sort(), online: false });
+      state.contacts.push({
+        userId: action.payload.userId.sort(),
+        online: false,
+      });
       state.data.push({
         userId: action.payload.userId.sort(),
         message: [],
@@ -216,6 +251,7 @@ export const {
   pushMessage,
   sendMessageSuccess,
   receiveMessage,
+  updateMessageReaction,
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

@@ -28,7 +28,7 @@ const DateShort = ({ timestamp, style }) => {
       result = format(timestamp, "dd MMM, HH:mm");
       break;
     default:
-      result = format(timestamp, "YYYY, dd MMM, HH:mm");
+      result = format(timestamp, "yyyy, dd MMM, HH:mm");
   }
   return <Text style={style}>{result.toUpperCase()}</Text>;
 };

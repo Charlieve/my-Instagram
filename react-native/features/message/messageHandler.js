@@ -10,6 +10,7 @@ import {
   pushMessage,
   sendMessageSuccess,
   receiveMessage,
+  updateMessageReaction,
 } from "./messageSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { pushNotification } from "../notification/notificationSlice";
@@ -45,12 +46,37 @@ const sendMessage = (message) => {
   });
 };
 
+const sendUpdatedMessageReaction = ({
+  contactIndex,
+  messageIndex,
+  emoji,
+  targetUserId,
+}) => {
+  const userId = store.getState().message.userId;
+  store.dispatch(
+    updateMessageReaction({
+      contactIndex,
+      messageIndex,
+      emoji,
+      userId: userId.replace(".", "#"), //mongodb objects key limit (NO DOT of key name)
+    })
+  );
+  socket.emit("sendMessageReactionFromClient", {
+    contactIndex,
+    messageIndex,
+    emoji,
+    userId,
+    targetUserId,
+    authedUserId: userId, //will do some authenticity
+  });
+};
+
 const subscript = () => {
   socket.on("connect", () => {
     // reconnect action below
     if (store.getState().message.status === "succeeded") {
-      console.log("reconnect")
-      online(store.getState().message.userId)
+      console.log("reconnect");
+      online(store.getState().message.userId);
     }
   });
 
@@ -90,6 +116,21 @@ const subscript = () => {
         : `${message.sendMessageData.content}`;
     store.dispatch(pushNotification({ image, title, content }));
   });
+
+  socket.on(
+    "sendMessageReactionFromOtherUser",
+    ({ targetUserId, messageIndex, userId, emoji }) => {
+      const a =store.dispatch(
+        updateMessageReaction({
+          targetUserId,
+          messageIndex,
+          emoji,
+          userId: userId.replace(".", "#"), //mongodb objects key limit (NO DOT of key name)
+        })
+      );
+      console.log(a)
+    }
+  );
 };
 
 const test = () => {
@@ -98,10 +139,11 @@ const test = () => {
 };
 
 export default {
+  subscript,
   online,
   offline,
   syncUsersActivity,
   test,
-  subscript,
   sendMessage,
+  sendUpdatedMessageReaction,
 };

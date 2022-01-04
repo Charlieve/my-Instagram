@@ -17,7 +17,7 @@ import { selectUserId } from "../features/user/userSlice";
 
 import { ChatMessageContext } from "./ChatMessageContext";
 
-import message from "../features/message/messageHandler";
+import messageHandler from "../features/message/messageHandler";
 
 const HiddenButton = (props) => {
   const { showAllButtons, typing } = props;
@@ -108,19 +108,19 @@ const ChatMessageInput = ({ contactId }) => {
 
   const sendMessage = (content) => {
     if (inputContent !== "") {
-      const index = messageData.length;
+      const index = uuid.v4(); //unid id
       const sendMessageData = {
         status: "pending",
-        index,
+        index, //need to change this key name to "messageId"
         userId,
         contentType: "chat",
         content: inputContent,
         date: Date.now(),
-        reactions: [],
-        readedBy: [],
+        reactions: {},
+        readedBy: {},
         trackingMessageId: uuid.v4(),
       };
-      message.sendMessage({
+      messageHandler.sendMessage({
         sendMessageData,
         contactIndex,
         targetUserId: Array.isArray(contactId) ? contactId : [contactId],
