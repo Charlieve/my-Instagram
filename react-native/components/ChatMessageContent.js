@@ -46,7 +46,6 @@ const createChatCellComponent = (props) => {
 };
 
 const ChatBubble = ({ item: message, index, section, setReacting }) => {
-  console.log(message);
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const totalQty = section.data.length;
@@ -78,16 +77,16 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
   const progress = useRef(new Animated.Value(0)).current;
   const pressProgress = useRef(new Animated.Value(0)).current;
 
-  const expend = ({ pageX, pageY }) => {
-    const touchPoint = { x: pageX, y: pageY };
-    setExpended(true);
-    setHighlight(true);
-    setReacting({ display: true, touchPoint, message });
-  };
   const closeExpended = () => {
     setExpended(false);
     setHighlight(false);
     setReacting({ display: false });
+  };
+  const expend = ({ pageX, pageY }) => {
+    const touchPoint = { x: pageX, y: pageY };
+    setExpended(true);
+    setHighlight(true);
+    setReacting({ display: true, touchPoint, message, closeExpended });
   };
   useEffect(() => {
     if (isExpended) {
@@ -134,13 +133,13 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
         )}
         <Animated.View
           style={[
+            styles.absoluteFill,
             {
-              position: "absolute",
               backgroundColor: "black",
-              width: 999999,
-              height: 999999,
-              top: -50000,
-              left: -50000,
+              left: -9999,
+              right: -9999,
+              top: -9999,
+              bottom: -9999,
             },
             { display: isExpended === false ? "none" : "flex" },
             {

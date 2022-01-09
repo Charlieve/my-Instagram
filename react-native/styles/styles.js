@@ -3,6 +3,7 @@ import { useTheme } from "@react-navigation/native";
 
 export default function createStyles() {
   const { colors } = useTheme();
+  const absoluteFill = StyleSheet.absoluteFill;
   const css = StyleSheet.create({
     normalFont: {
       fontSize: 14,
@@ -496,7 +497,8 @@ export default function createStyles() {
       borderRadius:50,
     },
     chatEmojiButton:{
-      padding:8
+      padding:10,
+      alignItems: "center",
     },
 
     notificationContainer: {
@@ -524,7 +526,12 @@ export default function createStyles() {
       flex: 1,
       justifyContent: "center",
     },
+
+    dot:{
+      borderRadius: 9999,
+      aspectRatio:1
+    }
   });
-  const style = { colors, css };
+  const style = { colors, css, absoluteFill };
   return style;
 }
