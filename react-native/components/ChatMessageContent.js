@@ -15,6 +15,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  PanResponder,
 } from "react-native";
 import { ChatMessageContext } from "./ChatMessageContext";
 import DateShort from "./DateShort";
@@ -24,7 +25,7 @@ import { selectUserId } from "../features/user/userSlice";
 import { selectMessageByIndexAndMessageIndex } from "../features/message/messageSlice";
 import UserIconImage from "./UserIconImage";
 import ChatMessageGradient from "./ChatMessageGradient";
-import MaskedView from "@react-native-masked-view/masked-view";
+import ChatMessageClock from "./ChatMessageClock";
 
 if (
   Platform.OS === "android" &&
@@ -70,6 +71,7 @@ const ChatBubble = ({
   index,
   section,
   setReacting,
+  setHighlight,
 }) => {
   const styles = createStyles();
   const userId = useSelector(selectUserId);
@@ -101,7 +103,6 @@ const ChatBubble = ({
   const myMessage = message.userId === userId;
 
   const [isExpended, setExpended] = useState(false);
-  const { setHighlight } = useContext(ChatCellContext);
   const progress = useRef(new Animated.Value(0)).current;
   const pressProgress = useRef(new Animated.Value(0)).current;
 
@@ -133,138 +134,145 @@ const ChatBubble = ({
   }, [isExpended]);
 
   return (
-    <View
-      style={[
-        {
-          flexDirection: myMessage ? "row-reverse" : "row",
-        },
-        isFirst && { marginTop: 5 },
-        isLast && { marginBottom: 5 },
-        haveReaction && { marginBottom: 15 },
-      ]}
-    >
+    <Animated.View style={{ flexDirection: "row" }}>
       <View
-        style={{
-          maxWidth: "70%",
-          flexDirection: myMessage ? "row-reverse" : "row",
-          alignItems: "flex-end",
-        }}
+        style={[
+          { flex: 1 },
+          {
+            flexDirection: myMessage ? "row-reverse" : "row",
+          },
+          isFirst && { marginTop: 5 },
+          isLast && { marginBottom: 5 },
+          haveReaction && { marginBottom: 15 },
+        ]}
       >
-        {useMemo(
-          () =>
-            !myMessage && (
-              <View style={{ width: 30, height: 30, marginRight: 10 }}>
-                {isLast && <UserIconImage userId={message.userId} />}
-              </View>
-            ),
-          [isLast]
-        )}
-        <Animated.View
-          style={[
-            styles.absoluteFill,
-            {
-              backgroundColor: "black",
-              left: -9999,
-              right: -9999,
-              top: -9999,
-              bottom: -9999,
-            },
-            { display: isExpended === false ? "none" : "flex" },
-            {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.7],
-              }),
-            },
-          ]}
-        >
-          <Pressable
-            style={{ width: "100%", height: "100%" }}
-            onPress={() => closeExpended()}
-          />
-        </Animated.View>
-        <Pressable
-          onPressIn={() => {
-            Animated.timing(pressProgress, {
-              toValue: 1,
-              useNativeDriver: false,
-            }).start();
-          }}
-          onPressOut={() => {
-            Animated.spring(pressProgress, {
-              toValue: 0,
-              friction: 4,
-              useNativeDriver: false,
-            }).start();
-          }}
-          onLongPress={({ nativeEvent }) => {
-            Animated.spring(pressProgress, {
-              toValue: 0,
-              friction: 4,
-              useNativeDriver: false,
-            }).start();
-            expend(nativeEvent);
+        <View
+          style={{
+            maxWidth: "70%",
+            flexDirection: myMessage ? "row-reverse" : "row",
+            alignItems: "flex-end",
           }}
         >
+          {useMemo(
+            () =>
+              !myMessage && (
+                <View style={{ width: 30, height: 30, marginRight: 10 }}>
+                  {isLast && <UserIconImage userId={message.userId} />}
+                </View>
+              ),
+            [isLast]
+          )}
           <Animated.View
             style={[
+              styles.absoluteFill,
               {
-                transform: [
-                  {
-                    scale: pressProgress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 0.85],
-                    }),
-                  },
-                ],
+                backgroundColor: "black",
+                left: -9999,
+                right: -9999,
+                top: -9999,
+                bottom: -9999,
+              },
+              { display: isExpended === false ? "none" : "flex" },
+              {
+                opacity: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.7],
+                }),
               },
             ]}
           >
-            {haveReplying && (
-              <ReplyingBubble
-                myMessage={myMessage}
-                contactIndex={contactIndex}
-                replyingIndex={message.replyToMessageIndex}
-              />
-            )}
-            <View
+            <Pressable
+              style={{ width: "100%", height: "100%" }}
+              onPress={() => closeExpended()}
+            />
+          </Animated.View>
+          <Pressable
+            onPressIn={() => {
+              Animated.timing(pressProgress, {
+                toValue: 1,
+                useNativeDriver: false,
+              }).start();
+            }}
+            onPressOut={() => {
+              Animated.spring(pressProgress, {
+                toValue: 0,
+                friction: 4,
+                useNativeDriver: false,
+              }).start();
+            }}
+            onLongPress={({ nativeEvent }) => {
+              Animated.spring(pressProgress, {
+                toValue: 0,
+                friction: 4,
+                useNativeDriver: false,
+              }).start();
+              expend(nativeEvent);
+            }}
+          >
+            <Animated.View
               style={[
-                styles.css.chatBubble,
-                myMessage
-                  ? styles.css.chatBubbleSelf
-                  : styles.css.chatBubbleOther,
-                isFirst && {
-                  borderTopRightRadius: 20,
-                  borderTopLeftRadius: 20,
+                {
+                  transform: [
+                    {
+                      scale: pressProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 0.85],
+                      }),
+                    },
+                  ],
                 },
-                isLast && {
-                  borderBottomRightRadius: 20,
-                  borderBottomLeftRadius: 20,
-                },
-                message.status === "pending" && { opacity: 0.7 },
               ]}
             >
-              {/* <ChatMessageGradient /> */}
-              {useMemo(
-                () => (
-                  <ChatBubbleContent message={message} myMessage={myMessage} />
-                ),
-                [message]
+              {haveReplying && (
+                <ReplyingBubble
+                  myMessage={myMessage}
+                  contactIndex={contactIndex}
+                  replyingIndex={message.replyToMessageIndex}
+                />
               )}
-              {useMemo(
-                () => (
-                  <ChatBubbleReaction
-                    reactions={message.reactions}
-                    myMessage={myMessage}
-                  />
-                ),
-                [message.reactions]
-              )}
-            </View>
-          </Animated.View>
-        </Pressable>
+              <View
+                style={[
+                  styles.css.chatBubble,
+                  myMessage
+                    ? styles.css.chatBubbleSelf
+                    : styles.css.chatBubbleOther,
+                  isFirst && {
+                    borderTopRightRadius: 20,
+                    borderTopLeftRadius: 20,
+                  },
+                  isLast && {
+                    borderBottomRightRadius: 20,
+                    borderBottomLeftRadius: 20,
+                  },
+                  message.status === "pending" && { opacity: 0.7 },
+                ]}
+              >
+                {/* <ChatMessageGradient /> */}
+                {useMemo(
+                  () => (
+                    <ChatBubbleContent
+                      message={message}
+                      myMessage={myMessage}
+                    />
+                  ),
+                  [message]
+                )}
+                {useMemo(
+                  () => (
+                    <ChatBubbleReaction
+                      reactions={message.reactions}
+                      myMessage={myMessage}
+                    />
+                  ),
+                  [message.reactions]
+                )}
+              </View>
+            </Animated.View>
+          </Pressable>
+        </View>
       </View>
-    </View>
+      <ChatMessageClock myMessage={myMessage} timestamp={message.date} />
+    </Animated.View>
   );
 };
 
@@ -369,8 +377,9 @@ const ChatBubbleReaction = ({ reactions, myMessage }) => {
 };
 
 const ChatBubbleView = () => {
-  const { contactIndex, item, index, section, setReacting } =
+  const { contactIndex, item, index, section, setReacting, setHighlight } =
     useContext(ChatContext);
+
   return useMemo(
     () => {
       return (
@@ -380,6 +389,7 @@ const ChatBubbleView = () => {
           index={index}
           section={section}
           setReacting={setReacting}
+          setHighlight={setHighlight}
         />
       );
     },
@@ -388,17 +398,41 @@ const ChatBubbleView = () => {
 };
 
 const ChatBubbleProvider = ({
+  pan,
   contactIndex,
   item,
   index,
   section,
   setReacting,
 }) => {
-  const context = { contactIndex, item, index, section, setReacting };
+  const { setHighlight } = useContext(ChatCellContext);
+  const context = {
+    contactIndex,
+    item,
+    index,
+    section,
+    setReacting,
+    setHighlight,
+  };
   return (
-    <ChatContext.Provider value={context}>
-      <ChatBubbleView />
-    </ChatContext.Provider>
+    <Animated.View
+      style={[
+        {
+          transform: [
+            {
+              translateX: pan.x.interpolate({
+                inputRange: [-300,-80, 0, 1],
+                outputRange: [-120,-60, 0, 0],
+              }),
+            },
+          ],
+        },
+      ]}
+    >
+      <ChatContext.Provider value={context}>
+        <ChatBubbleView />
+      </ChatContext.Provider>
+    </Animated.View>
   );
 };
 
@@ -422,42 +456,80 @@ const ChatMessageContent = ({ contactId }) => {
   const styles = createStyles();
   const { messageData, contactIndex, setReacting, replying } =
     useContext(ChatMessageContext);
+
+  const [scrollable, setScrollable] = useState(true);
+  const [scrolling, setSrcolling] = useState(false);
+
   const messageDataSection = useMemo(() => {
     return sectioningByMessageDate(messageData);
   }, [messageData]);
+
   useMemo(() => {
     LayoutAnimation.configureNext(
       LayoutAnimation.create(200, "easeInEaseOut", "opacity")
     );
   }, [messageData, replying]);
 
+  const pan = useRef(new Animated.ValueXY()).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (event, gestureState) => {
+        if (scrolling === false && gestureState.dx < -5) {
+          return true;
+        }
+      },
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+        useNativeDriver: false,
+      }),
+
+      onPanResponderTerminate: () => {
+        Animated.spring(
+          pan, // Auto-multiplexed
+          { toValue: { x: 0, y: 0 }, useNativeDriver: false } // Back to zero
+        ).start();
+      },
+      onPanResponderRelease: () => {
+        Animated.spring(
+          pan, // Auto-multiplexed
+          { toValue: { x: 0, y: 0 }, useNativeDriver: false } // Back to zero
+        ).start();
+      },
+    })
+  ).current;
+
   return useMemo(
     () => (
-      <SectionList
-        sections={messageDataSection}
-        CellRendererComponent={createChatCellComponent}
-        renderItem={({ item, index, section }) => (
-          <ChatBubbleProvider
-            contactIndex={contactIndex}
-            item={item}
-            index={index}
-            section={section}
-            setReacting={setReacting}
-          />
-        )}
-        keyExtractor={(item, index) => "message " + index}
-        renderSectionHeader={({ section: { date } }) => (
-          <DateSectionTitle date={date} />
-        )}
-        contentContainerStyle={[
-          styles.css.chatMessageContainer,
-          replying.display && { paddingTop: 120 },
-        ]}
-        inverted={-1}
-        initialScrollIndex={0}
-      />
+      <View {...panResponder.panHandlers}>
+        <SectionList
+          sections={messageDataSection}
+          CellRendererComponent={createChatCellComponent}
+          renderItem={({ item, index, section }) => (
+            <ChatBubbleProvider
+              pan={pan}
+              contactIndex={contactIndex}
+              item={item}
+              index={index}
+              section={section}
+              setReacting={setReacting}
+            />
+          )}
+          keyExtractor={(item, index) => "message " + index}
+          renderSectionHeader={({ section: { date } }) => (
+            <DateSectionTitle date={date} />
+          )}
+          contentContainerStyle={[
+            styles.css.chatMessageContainer,
+            replying.display && { paddingTop: 120 },
+          ]}
+          inverted={-1}
+          initialScrollIndex={0}
+          onScrollBeginDrag={() => setSrcolling(true)}
+          onScrollEndDrag={() => setSrcolling(false)}
+          scrollEnabled={scrollable}
+        />
+      </View>
     ),
-    [messageDataSection, replying]
+    [messageDataSection, replying, scrollable]
   );
 };
 

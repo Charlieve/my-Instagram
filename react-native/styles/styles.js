@@ -515,6 +515,14 @@ export default function createStyles() {
       fontSize:12,
       color:colors.subText
     },
+    chatClockContainer:{
+      position: "absolute",
+      top:0,
+      bottom:0,
+      right:-65,
+      justifyContent: "flex-end",
+      paddingBottom:15,
+    },
 
     notificationContainer: {
       position: "absolute",
