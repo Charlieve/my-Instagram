@@ -1,5 +1,5 @@
 import GLOBAL from "../GLOBAL.json";
-import React, { useContext, useRef, useEffect, useState } from "react";
+import React, { useContext, useRef, useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
 import createStyles from "../styles/styles";
 import uuid from "react-native-uuid";
 import Icon from "react-native-vector-icons/Ionicons";
+import ChatMessageReplying from "./ChatMessageReplying";
+import ChatMessageReplyingBG from "./ChatMessageReplyingBG";
 
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
@@ -96,24 +98,31 @@ const TypingButton = (props) => {
 };
 
 const ChatMessageInput = ({ contactId }) => {
-  const { messageData, contactIndex, reacting } =
+  const { messageData, contactIndex, reacting, replying, setReplying } =
     useContext(ChatMessageContext);
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const typing = useRef(new Animated.Value(0)).current;
   const showAllButtons = useRef(new Animated.Value(0)).current;
   const [inputContent, onChangeText] = useState("");
+  const inputComponent = useRef();
+  const sendButtonOpacity = () =>
+    inputContent.length > 0 ? { opacity: 1 } : { opacity: 0.5 };
 
   // SEND MESSAGE ACTION
 
   const sendMessage = (content) => {
     if (inputContent !== "") {
       const index = uuid.v4(); //unid id
+      const replyToMessageIndex = replying.display
+        ? replying.replyingMessage.index
+        : null;
       const sendMessageData = {
         status: "pending",
         index, //need to change this key name to "messageId"
         userId,
         contentType: "chat",
+        replyToMessageIndex,
         content: inputContent,
         date: Date.now(),
         reactions: {},
@@ -125,26 +134,35 @@ const ChatMessageInput = ({ contactId }) => {
         contactIndex,
         targetUserId: Array.isArray(contactId) ? contactId : [contactId],
       });
+      setReplying({ display: false });
       onChangeText("");
     }
   };
 
   useEffect(() => {
-    if (inputContent.length > 0 && typing.__getValue() === 0) {
+    if (
+      (inputContent.length > 0 || replying.display) &&
+      typing.__getValue() === 0
+    ) {
       Animated.timing(typing, {
         toValue: 1,
         duration: 120,
         useNativeDriver: false,
       }).start();
+      inputComponent.current.focus();
     }
-    if (inputContent.length === 0 && typing.__getValue() === 1) {
+    if (
+      inputContent.length === 0 &&
+      !replying.display &&
+      typing.__getValue() === 1
+    ) {
       Animated.timing(typing, {
         toValue: 0,
         duration: 120,
         useNativeDriver: false,
       }).start();
     }
-  }, [inputContent]);
+  }, [inputContent, replying]);
 
   const progress = useRef(new Animated.Value(1)).current; //show and hide input
   useEffect(() => {
@@ -163,57 +181,37 @@ const ChatMessageInput = ({ contactId }) => {
     }
   }, [reacting.display]);
 
-  return (
-    <Animated.View
-      style={[
-        styles.css.messageInputComponent,
-        {
-          transform: [
-            {
-              translateY: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [70, 0],
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 10,
-          width: "100%",
-          backgroundColor: styles.colors.background,
-          height: "50%",
-        }}
-      />
-      <View style={styles.css.messageInputContainer}>
-        <FunctionButton typing={typing}>
-          <TouchableOpacity
-            style={[
-              styles.css.messageInputCircleButton,
+  return useMemo(
+    () => (
+      <Animated.View
+        style={[
+          styles.css.messageInputComponent,
+          {
+            transform: [
               {
-                backgroundColor: styles.colors.smartButton,
+                translateY: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [70, 0],
+                }),
               },
-            ]}
-            onPress={() => {
-              console.log("camera");
-            }}
-          >
-            <Icon name="camera" size={24} color="white" />
-          </TouchableOpacity>
-        </FunctionButton>
+            ],
+          },
+        ]}
+      >
+        <ChatMessageReplyingBG />
+        <ChatMessageReplying />
         <View
           style={{
             position: "absolute",
-            bottom: 5,
-            left: 5,
-            display: inputContent ? "flex" : "none",
+            bottom: 0,
+            left: 10,
+            width: "100%",
+            backgroundColor: styles.colors.background,
+            height: "50%",
           }}
-        >
-          <TypingButton typing={typing}>
+        />
+        <View style={styles.css.messageInputContainer}>
+          <FunctionButton typing={typing}>
             <TouchableOpacity
               style={[
                 styles.css.messageInputCircleButton,
@@ -222,177 +220,210 @@ const ChatMessageInput = ({ contactId }) => {
                 },
               ]}
               onPress={() => {
-                console.log("search");
+                console.log("camera");
               }}
             >
-              <Icon name="search" size={24} color="white" />
+              <Icon name="camera" size={24} color="white" />
             </TouchableOpacity>
-          </TypingButton>
-        </View>
-        <View style={styles.css.messageTextInput}>
-          <TextInput
-            multiline
-            numberOfLines={1}
-            placeholder="Message..."
-            placeholderTextColor={styles.colors.subText}
-            style={styles.css.messageInputTextInputText}
-            value={inputContent}
-            onChangeText={(text) => onChangeText(text)}
-          />
-        </View>
-        <View style={{ height: "100%", minWidth: 60 }}>
-          <Animated.View
-            style={[
-              {
-                display: !inputContent ? "flex" : "none",
-                flexDirection: "row",
-                transform: [
-                  {
-                    scale: typing.interpolate({
-                      inputRange: [0, 0.9, 1],
-                      outputRange: [1, 1, 0],
-                    }),
-                  },
-                ],
-              },
-            ]}
+          </FunctionButton>
+          <View
+            style={{
+              position: "absolute",
+              bottom: 5,
+              left: 5,
+              display: inputContent || replying.display ? "flex" : "none",
+            }}
           >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <FunctionButton typing={typing}>
-                <TouchableOpacity style={styles.css.messageInputSmallButton}>
-                  <Icon
-                    name="mic-outline"
-                    size={28}
-                    color={styles.colors.text}
-                  />
-                </TouchableOpacity>
-              </FunctionButton>
-              <FunctionButton typing={typing}>
-                <TouchableOpacity style={styles.css.messageInputSmallButton}>
-                  <Icon
-                    name="image-outline"
-                    size={28}
-                    color={styles.colors.text}
-                  />
-                </TouchableOpacity>
-              </FunctionButton>
-              <FunctionButton typing={typing}>
-                <HiddenButton showAllButtons={showAllButtons} typing={typing}>
+            <TypingButton typing={typing}>
+              <TouchableOpacity
+                style={[
+                  styles.css.messageInputCircleButton,
+                  {
+                    backgroundColor: styles.colors.smartButton,
+                  },
+                ]}
+                onPress={() => {
+                  console.log("search");
+                }}
+              >
+                <Icon name="search" size={24} color="white" />
+              </TouchableOpacity>
+            </TypingButton>
+          </View>
+          <View style={styles.css.messageTextInput}>
+            <TextInput
+              multiline
+              numberOfLines={1}
+              placeholder="Message..."
+              placeholderTextColor={styles.colors.subText}
+              style={styles.css.messageInputTextInputText}
+              value={inputContent}
+              onChangeText={(text) => onChangeText(text)}
+              ref={inputComponent}
+            />
+          </View>
+          <View style={{ height: "100%", minWidth: 60 }}>
+            <Animated.View
+              style={[
+                {
+                  display: !inputContent || !replying.display ? "flex" : "none",
+                  flexDirection: "row",
+                  transform: [
+                    {
+                      scale: typing.interpolate({
+                        inputRange: [0, 0.9, 1],
+                        outputRange: [1, 1, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <FunctionButton typing={typing}>
                   <TouchableOpacity style={styles.css.messageInputSmallButton}>
                     <Icon
-                      name="document-outline"
-                      size={32}
-                      color={styles.colors.text}
-                      style={{
-                        transform: [
-                          { rotateX: "135deg" },
-                          { translateX: 1 },
-                          { scaleY: 1.1 },
-                          { scaleX: 1.05 },
-                        ],
-                      }}
-                    />
-                    <View
-                      style={{
-                        position: "absolute",
-                        height: 12,
-                        width: 23,
-                        overflow: "hidden",
-                        top: 9,
-                        left: 8,
-                      }}
-                    >
-                      <Icon
-                        name="logo-reddit"
-                        size={32}
-                        color={styles.colors.text}
-                        style={{ top: -15, left: -9, position: "absolute" }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </HiddenButton>
-              </FunctionButton>
-
-              <FunctionButton typing={typing}>
-                <HiddenButton showAllButtons={showAllButtons} typing={typing}>
-                  <TouchableOpacity style={styles.css.messageInputSmallButton}>
-                    <Icon
-                      name="chatbox-ellipses-outline"
+                      name="mic-outline"
                       size={28}
                       color={styles.colors.text}
                     />
                   </TouchableOpacity>
-                </HiddenButton>
-              </FunctionButton>
-            </View>
+                </FunctionButton>
+                <FunctionButton typing={typing}>
+                  <TouchableOpacity style={styles.css.messageInputSmallButton}>
+                    <Icon
+                      name="image-outline"
+                      size={28}
+                      color={styles.colors.text}
+                    />
+                  </TouchableOpacity>
+                </FunctionButton>
+                <FunctionButton typing={typing}>
+                  <HiddenButton showAllButtons={showAllButtons} typing={typing}>
+                    <TouchableOpacity
+                      style={styles.css.messageInputSmallButton}
+                    >
+                      <Icon
+                        name="document-outline"
+                        size={32}
+                        color={styles.colors.text}
+                        style={{
+                          transform: [
+                            { rotateX: "135deg" },
+                            { translateX: 1 },
+                            { scaleY: 1.1 },
+                            { scaleX: 1.05 },
+                          ],
+                        }}
+                      />
+                      <View
+                        style={{
+                          position: "absolute",
+                          height: 12,
+                          width: 23,
+                          overflow: "hidden",
+                          top: 9,
+                          left: 8,
+                        }}
+                      >
+                        <Icon
+                          name="logo-reddit"
+                          size={32}
+                          color={styles.colors.text}
+                          style={{ top: -15, left: -9, position: "absolute" }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </HiddenButton>
+                </FunctionButton>
 
-            <FunctionButton typing={typing}>
-              <Animated.View
-                style={{
-                  marginRight: showAllButtons.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [5, 0],
-                  }),
-                  transform: [
-                    {
-                      rotateZ: showAllButtons.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0deg", "45deg"],
-                      }),
-                    },
-                  ],
-                }}
-              >
-                <TouchableOpacity
-                  style={[styles.css.messageInputSmallButton]}
-                  onPress={() => {
-                    Animated.timing(showAllButtons, {
-                      toValue: +!showAllButtons.__getValue(),
-                      duration: 120,
-                      useNativeDriver: false,
-                    }).start();
+                <FunctionButton typing={typing}>
+                  <HiddenButton showAllButtons={showAllButtons} typing={typing}>
+                    <TouchableOpacity
+                      style={styles.css.messageInputSmallButton}
+                    >
+                      <Icon
+                        name="chatbox-ellipses-outline"
+                        size={28}
+                        color={styles.colors.text}
+                      />
+                    </TouchableOpacity>
+                  </HiddenButton>
+                </FunctionButton>
+              </View>
+
+              <FunctionButton typing={typing}>
+                <Animated.View
+                  style={{
+                    marginRight: showAllButtons.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [5, 0],
+                    }),
+                    transform: [
+                      {
+                        rotateZ: showAllButtons.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ["0deg", "45deg"],
+                        }),
+                      },
+                    ],
                   }}
                 >
-                  <Icon
-                    name="add-circle"
-                    size={28}
-                    color={styles.colors.text}
-                  />
-                </TouchableOpacity>
-              </Animated.View>
-            </FunctionButton>
-          </Animated.View>
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              justifyContent: "center",
-              bottom: -3,
-              right: 0,
-              display: inputContent ? "flex" : "none",
-            }}
-          >
-            <TypingButton typing={typing}>
-              <Text
-                style={[
-                  styles.css.boldFont,
-                  {
-                    fontSize: 18,
-                    color: styles.colors.smartButton,
-                    paddingLeft: 5,
-                    paddingRight: 10,
-                    paddingTop: 10,
-                    paddingBottom: 10,
-                  },
-                ]}
-                onPress={() => sendMessage(inputContent)}
-              >
-                Send
-              </Text>
-            </TypingButton>
-          </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.css.messageInputSmallButton]}
+                    onPress={() => {
+                      Animated.timing(showAllButtons, {
+                        toValue: +!showAllButtons.__getValue(),
+                        duration: 120,
+                        useNativeDriver: false,
+                      }).start();
+                    }}
+                  >
+                    <Icon
+                      name="add-circle"
+                      size={28}
+                      color={styles.colors.text}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+              </FunctionButton>
+            </Animated.View>
+            <TouchableOpacity
+              style={{
+                position: "absolute",
+                justifyContent: "center",
+                bottom: -3,
+                right: 0,
+                display: inputContent || replying.display ? "flex" : "none",
+              }}
+            >
+              <TypingButton typing={typing}>
+                <Text
+                  style={[
+                    styles.css.boldFont,
+                    {
+                      fontSize: 18,
+                      color: styles.colors.smartButton,
+                      paddingLeft: 5,
+                      paddingRight: 10,
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                    },
+                    sendButtonOpacity(),
+                  ]}
+                  onPress={() =>
+                    inputContent.length && sendMessage(inputContent)
+                  }
+                >
+                  Send
+                </Text>
+              </TypingButton>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    ),
+    [inputContent, replying]
   );
 };
 

@@ -5,7 +5,7 @@ import { ChatMessageContext } from "./ChatMessageContext";
 
 const ChatMessageReactionBottom = ({ contactId }) => {
   const styles = createStyles();
-  const { messageData, contactIndex, reacting } =
+  const { messageData, contactIndex, reacting, setReplying } =
     useContext(ChatMessageContext);
 
   const progress = useRef(new Animated.Value(0)).current;
@@ -24,6 +24,12 @@ const ChatMessageReactionBottom = ({ contactId }) => {
       }).start();
     }
   }, [reacting.display]);
+
+  const replyToMessage = () =>{
+    setReplying({display:true,replyingMessage:reacting.message})
+    reacting?.closeExpended();
+  }
+
   return (
     <Animated.View
       style={[
@@ -41,7 +47,7 @@ const ChatMessageReactionBottom = ({ contactId }) => {
       ]}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-        <Pressable style={styles.css.messageReactionBottomButton}>
+        <Pressable style={styles.css.messageReactionBottomButton} onPress={()=>replyToMessage()}>
           <Text style={[styles.css.superBoldFont, { fontSize: 16 }]}>
             Reply
           </Text>

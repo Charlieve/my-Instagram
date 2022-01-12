@@ -62,6 +62,9 @@ const Theme = {
     smartButton: "#337bef",
     online: "#00cf00",
     chatBubble: "#7351da",
+    chatBubbleOther: "#eee",
+    chatBubbleGradient1: "#337bef",
+    chatBubbleGradient2: "#7351da",
   },
 };
 
@@ -82,6 +85,9 @@ const ThemeDark = {
     smartButton: "#337bef",
     online: "#00cf00",
     chatBubble: "#7351da",
+    chatBubbleOther: "#111",
+    chatBubbleGradient1: "#337bef",
+    chatBubbleGradient2: "#7351da",
   },
 };
 

@@ -18,6 +18,7 @@ const ChatMessageProviderComponent = (props) => {
   const { contactId } = props;
   const [inputContent, onChangeText] = useState("");
   const [reacting, setReacting] = useState({display:false});
+  const [replying, setReplying] = useState({display:false});
   const contactIndex = useSelector((state) =>
     selectMessageIndexByUserId(state, contactId)
   );
@@ -27,12 +28,15 @@ const ChatMessageProviderComponent = (props) => {
   return (
     <ChatMessageContext.Provider
       value={{
+        contactId,
         inputContent,
         onChangeText,
         messageData,
         contactIndex,
         reacting,
         setReacting,
+        replying,
+        setReplying
       }}
     >
       {props.children}
@@ -52,7 +56,7 @@ const ChatMessageProvider = ({ contactId }) => {
               "padding"
         }
         enabled
-        keyboardVerticalOffset={85}
+        keyboardVerticalOffset={80}
         style={{ flex: 1 }}
       >
         <View style={{ flex: 1, justifyContent: "space-around" }}>

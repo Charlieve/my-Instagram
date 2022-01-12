@@ -351,7 +351,7 @@ export default function createStyles() {
       width: "100%",
     },
     messageInputContainer: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.chatBubbleOther,
       borderRadius: 25,
       marginBottom: 8,
       flexDirection: "row",
@@ -395,7 +395,7 @@ export default function createStyles() {
     messageReactionBottomButton: {
       flex: 1,
       padding: 17,
-      backgroundColor: colors.border,
+      backgroundColor: colors.chatBubbleOther,
       alignItems: "center",
     },
 
@@ -437,7 +437,7 @@ export default function createStyles() {
 
     chatBubble: {
       padding: 12,
-      backgroundColor: colors.border,
+      backgroundColor: colors.chatBubbleOther,
       // borderRadius: 20,
       borderRadius: 3,
       marginTop: 1,
@@ -446,7 +446,7 @@ export default function createStyles() {
       minWidth: 40,
       justifyContent: "center",
       alignItems: "center",
-      flexDirection: "row"
+      flexDirection: "row",
     },
     chatFont: {
       fontSize: 16,
@@ -455,18 +455,20 @@ export default function createStyles() {
     chatBubbleOther: {
       borderTopRightRadius: 20,
       borderBottomRightRadius: 20,
+      alignSelf: "flex-start",
     },
     chatBubbleSelf: {
       backgroundColor: colors.chatBubble,
       borderTopLeftRadius: 20,
       borderBottomLeftRadius: 20,
+      alignSelf: "flex-end",
     },
     chatFontSelf: {
       color: "white",
     },
     chatBubbleReactionContainer:{
       position: "absolute",
-      backgroundColor: colors.border,
+      backgroundColor: colors.chatBubbleOther,
       padding:5,
       borderRadius: 50,
       borderWidth: 2,
@@ -485,7 +487,7 @@ export default function createStyles() {
       position: "absolute",
     },
     chatEmojiReactionComponent: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.chatBubbleOther,
       shadowColor: "black",
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.5,
@@ -499,6 +501,19 @@ export default function createStyles() {
     chatEmojiButton:{
       padding:10,
       alignItems: "center",
+    },
+    chatBubbleReply:{
+      borderRadius:20,
+    },
+    chatBubbleReplySymbol:{
+      borderRadius:50,
+      width:4,
+      backgroundColor: colors.chatBubbleOther,
+      marginHorizontal:5
+    },
+    chatBubbleReplyHeaderFont:{
+      fontSize:12,
+      color:colors.subText
     },
 
     notificationContainer: {

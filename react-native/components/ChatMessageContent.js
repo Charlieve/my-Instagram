@@ -6,13 +6,32 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import { Animated, View, Text, Pressable, SectionList } from "react-native";
+import {
+  Animated,
+  View,
+  Text,
+  Pressable,
+  SectionList,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from "react-native";
 import { ChatMessageContext } from "./ChatMessageContext";
 import DateShort from "./DateShort";
 import createStyles from "../styles/styles";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../features/user/userSlice";
+import { selectMessageByIndexAndMessageIndex } from "../features/message/messageSlice";
 import UserIconImage from "./UserIconImage";
+import ChatMessageGradient from "./ChatMessageGradient";
+import MaskedView from "@react-native-masked-view/masked-view";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const ChatContext = createContext();
 const ChatCellContext = createContext();
@@ -45,7 +64,13 @@ const createChatCellComponent = (props) => {
   );
 };
 
-const ChatBubble = ({ item: message, index, section, setReacting }) => {
+const ChatBubble = ({
+  contactIndex,
+  item: message,
+  index,
+  section,
+  setReacting,
+}) => {
   const styles = createStyles();
   const userId = useSelector(selectUserId);
   const totalQty = section.data.length;
@@ -59,16 +84,19 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
     return sameUserId && sameStatus && sendInMin;
   };
   const haveReaction = Object.keys(message.reactions).length !== 0;
+  const haveReplying = message.replyToMessageIndex;
 
   const isFirst =
     index === 0 ||
     !checkMessageinSameSection(message, section.data[index - 1]) ||
-    Object.keys(section.data[index - 1].reactions).length !== 0;
+    Object.keys(section.data[index - 1].reactions).length !== 0 ||
+    haveReplying;
 
   const isLast =
     index === totalQty - 1 ||
     !checkMessageinSameSection(message, section.data[index + 1]) ||
-    haveReaction;
+    haveReaction ||
+    section.data[index + 1].replyToMessageIndex;
 
   const myMessage = message.userId === userId;
 
@@ -180,19 +208,6 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
         >
           <Animated.View
             style={[
-              styles.css.chatBubble,
-              myMessage
-                ? styles.css.chatBubbleSelf
-                : styles.css.chatBubbleOther,
-              isFirst && {
-                borderTopRightRadius: 20,
-                borderTopLeftRadius: 20,
-              },
-              isLast && {
-                borderBottomRightRadius: 20,
-                borderBottomLeftRadius: 20,
-              },
-              message.status === "pending" && { opacity: 0.7 },
               {
                 transform: [
                   {
@@ -205,23 +220,102 @@ const ChatBubble = ({ item: message, index, section, setReacting }) => {
               },
             ]}
           >
-            {useMemo(
-              () => (
-                <ChatBubbleContent message={message} myMessage={myMessage} />
-              ),
-              [message]
+            {haveReplying && (
+              <ReplyingBubble
+                myMessage={myMessage}
+                contactIndex={contactIndex}
+                replyingIndex={message.replyToMessageIndex}
+              />
             )}
-            {useMemo(
-              () => (
-                <ChatBubbleReaction
-                  reactions={message.reactions}
-                  myMessage={myMessage}
-                />
-              ),
-              [message.reactions]
-            )}
+            <View
+              style={[
+                styles.css.chatBubble,
+                myMessage
+                  ? styles.css.chatBubbleSelf
+                  : styles.css.chatBubbleOther,
+                isFirst && {
+                  borderTopRightRadius: 20,
+                  borderTopLeftRadius: 20,
+                },
+                isLast && {
+                  borderBottomRightRadius: 20,
+                  borderBottomLeftRadius: 20,
+                },
+                message.status === "pending" && { opacity: 0.7 },
+              ]}
+            >
+              {/* <ChatMessageGradient /> */}
+              {useMemo(
+                () => (
+                  <ChatBubbleContent message={message} myMessage={myMessage} />
+                ),
+                [message]
+              )}
+              {useMemo(
+                () => (
+                  <ChatBubbleReaction
+                    reactions={message.reactions}
+                    myMessage={myMessage}
+                  />
+                ),
+                [message.reactions]
+              )}
+            </View>
           </Animated.View>
         </Pressable>
+      </View>
+    </View>
+  );
+};
+
+const ReplyingBubble = ({ myMessage, contactIndex, replyingIndex }) => {
+  const styles = createStyles();
+  const userId = useSelector(selectUserId);
+  const replyingMessage = useSelector((state) =>
+    selectMessageByIndexAndMessageIndex(state, contactIndex, replyingIndex)
+  ) || { content: "message deleted" };
+  const replyingMyMessage = replyingMessage?.userId === userId;
+  const replyHeader = myMessage
+    ? `You replied${replyingMyMessage ? " to youreself" : ""}`
+    : `Replied to ${replyingMyMessage ? "you" : "themselves"}`;
+  return (
+    <View>
+      <View
+        style={[
+          { marginBottom: 5, marginHorizontal: 10 },
+          myMessage ? { alignItems: "flex-end" } : { alignItems: "flex-start" },
+        ]}
+      >
+        <Text style={[styles.css.chatBubbleReplyHeaderFont]}>
+          {replyHeader}
+        </Text>
+      </View>
+      <View
+        style={[
+          { opacity: 0.7 },
+          myMessage
+            ? { flexDirection: "row-reverse" }
+            : { flexDirection: "row" },
+        ]}
+      >
+        <View style={styles.css.chatBubbleReplySymbol} />
+        <View
+          style={[
+            styles.css.chatBubble,
+            styles.css.chatBubbleReply,
+            replyingMyMessage && styles.css.chatBubbleSelf,
+          ]}
+        >
+          <Text
+            style={[
+              styles.css.chatFont,
+              replyingMyMessage && styles.css.chatFontSelf,
+            ]}
+            numberOfLines={3}
+          >
+            {replyingMessage.content}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -275,11 +369,13 @@ const ChatBubbleReaction = ({ reactions, myMessage }) => {
 };
 
 const ChatBubbleView = () => {
-  const { item, index, section, setReacting } = useContext(ChatContext);
+  const { contactIndex, item, index, section, setReacting } =
+    useContext(ChatContext);
   return useMemo(
     () => {
       return (
         <ChatBubble
+          contactIndex={contactIndex}
           item={item}
           index={index}
           section={section}
@@ -291,8 +387,14 @@ const ChatBubbleView = () => {
   );
 };
 
-const ChatBubbleProvider = ({ item, index, section, setReacting }) => {
-  const context = { item, index, section, setReacting };
+const ChatBubbleProvider = ({
+  contactIndex,
+  item,
+  index,
+  section,
+  setReacting,
+}) => {
+  const context = { contactIndex, item, index, section, setReacting };
   return (
     <ChatContext.Provider value={context}>
       <ChatBubbleView />
@@ -318,12 +420,17 @@ const sectioningByMessageDate = (messageData) => {
 
 const ChatMessageContent = ({ contactId }) => {
   const styles = createStyles();
-  const { messageData, contactIndex, setReacting } =
+  const { messageData, contactIndex, setReacting, replying } =
     useContext(ChatMessageContext);
-  const messageDataSection = useMemo(
-    () => sectioningByMessageDate(messageData),
-    [messageData]
-  );
+  const messageDataSection = useMemo(() => {
+    return sectioningByMessageDate(messageData);
+  }, [messageData]);
+  useMemo(() => {
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(200, "easeInEaseOut", "opacity")
+    );
+  }, [messageData, replying]);
+
   return useMemo(
     () => (
       <SectionList
@@ -331,6 +438,7 @@ const ChatMessageContent = ({ contactId }) => {
         CellRendererComponent={createChatCellComponent}
         renderItem={({ item, index, section }) => (
           <ChatBubbleProvider
+            contactIndex={contactIndex}
             item={item}
             index={index}
             section={section}
@@ -341,12 +449,15 @@ const ChatMessageContent = ({ contactId }) => {
         renderSectionHeader={({ section: { date } }) => (
           <DateSectionTitle date={date} />
         )}
-        contentContainerStyle={styles.css.chatMessageContainer}
+        contentContainerStyle={[
+          styles.css.chatMessageContainer,
+          replying.display && { paddingTop: 120 },
+        ]}
         inverted={-1}
         initialScrollIndex={0}
       />
     ),
-    [messageDataSection]
+    [messageDataSection, replying]
   );
 };
 

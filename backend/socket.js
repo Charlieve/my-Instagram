@@ -77,6 +77,7 @@ module.exports = function (io, DBUsers, DBPosts, DBPostContents) {
           userId: authedUserId,
           index: data.sendMessageData.index, //unstable, need to gen a unique id ; no get from request, and send back and update
           contentType: data.sendMessageData.contentType,
+          replyToMessageIndex : data.sendMessageData.replyToMessageIndex,
           content: data.sendMessageData.content,
           date: Date.now(),
           reactions: {},

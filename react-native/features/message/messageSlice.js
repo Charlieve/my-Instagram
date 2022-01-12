@@ -187,7 +187,8 @@ const messageSlice = createSlice({
                   JSON.stringify(item) ===
                   JSON.stringify(action.payload.targetUserId.sort())
               );
-      if (contactIndex !== -1) { //if have contact
+      if (contactIndex !== -1) {
+        //if have contact
 
         const messageIndex = action.payload.messageIndex;
         const reactionEmoji = action.payload.emoji;
@@ -195,7 +196,8 @@ const messageSlice = createSlice({
           contactIndex
         ].message.findIndex((item) => item.index === messageIndex);
 
-        if (updatedMessageStateIndex !== -1) { //if did not delete message
+        if (updatedMessageStateIndex !== -1) {
+          //if did not delete message
           const updatedMessageState = updatedState[contactIndex];
           const updatedMessage =
             updatedMessageState.message[updatedMessageStateIndex];
@@ -262,6 +264,17 @@ export const selectMessageContacts = (state) => state.message.contacts;
 export const selectMessageByIndex = (state, index) => {
   return state.message.data[index].message;
 };
+
+export const selectMessageByIndexAndMessageIndex = (
+  state,
+  index,
+  messageIndex
+) => {
+  const messagesData = state.message.data[index].message;
+  const result = messagesData.find((message) => message.index === messageIndex);
+  return result;
+};
+
 export const selectMessageIndexByUserId = (state, userId) => {
   userId = Array.isArray(userId) ? [...userId].sort() : [userId];
   const index = state.message.data

@@ -82,13 +82,13 @@ const ChatMessageReactionEmoji = ({ contactId }) => {
               {
                 translateY: progress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: ["100%", "0%"],
+                  outputRange: ["80%", "0%"],
                 }),
               },
               {
                 translateX: progress.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [myMessage.current ? "100%" : "-100%", "0%"],
+                  outputRange: [myMessage.current ? "150%" : "-150%", "0%"],
                 }),
               },
               {
