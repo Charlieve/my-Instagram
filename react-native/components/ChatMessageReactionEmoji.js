@@ -15,15 +15,15 @@ const EmojiButton = ({ emoji, contactId }) => {
   const selected = reacting?.message?.reactions?.[userIdWithOutDot] === emoji;
   return (
     <Pressable
-      onPress={() =>
-        {message.sendUpdatedMessageReaction({
+      onPress={() => {
+        message.sendUpdatedMessageReaction({
           contactIndex,
           messageIndex: reacting.message.index,
           emoji,
           targetUserId: Array.isArray(contactId) ? contactId : [contactId],
         });
-        reacting?.closeExpended()}
-      }
+        reacting?.closeExpended();
+      }}
     >
       <View style={styles.css.chatEmojiButton}>
         <Text style={{ fontSize: 32 }}>{emoji}</Text>
@@ -69,51 +69,51 @@ const ChatMessageReactionEmoji = ({ contactId }) => {
   });
   return useMemo(
     () => (
-      <Animated.View
-        style={[
-          styles.css.chatEmojiReactionContainer,
-          {
-            top: locationY.current - 150,
-            left: Math.min(locationX.current, 20),
-            right: Math.min(locationX.current, 20),
-          },
-          {
-            transform: [
-              {
-                translateY: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["80%", "0%"],
-                }),
-              },
-              {
-                translateX: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [myMessage.current ? "150%" : "-150%", "0%"],
-                }),
-              },
-              {
-                scale: progress.interpolate({
-                  inputRange: [-1, 0, 1],
-                  outputRange: [0, 0, 1],
-                }),
-              },
-            ],
-            opacity: progress.interpolate({
-              inputRange: [-1, 0, 0.5, 1],
-              outputRange: [0, 0, 0, 1],
-            }),
-          },
-        ]}
-      >
-        <View style={styles.css.chatEmojiReactionComponent}>
-          <EmojiButton emoji="❤️" contactId={contactId} />
-          <EmojiButton emoji="😮" contactId={contactId} />
-          <EmojiButton emoji="😂" contactId={contactId} />
-          <EmojiButton emoji="😢" contactId={contactId} />
-          <EmojiButton emoji="😡" contactId={contactId} />
-          <EmojiButton emoji="👍" contactId={contactId} />
-        </View>
-      </Animated.View>
+        <Animated.View
+          style={[
+            styles.css.chatEmojiReactionContainer,
+            {
+              top: locationY.current - 150,
+              left: Math.min(locationX.current, 20),
+              right: Math.min(locationX.current, 20),
+            },
+            {
+              transform: [
+                {
+                  translateY: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["80%", "0%"],
+                  }),
+                },
+                {
+                  translateX: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [myMessage.current ? "150%" : "-150%", "0%"],
+                  }),
+                },
+                {
+                  scale: progress.interpolate({
+                    inputRange: [-1, 0, 1],
+                    outputRange: [0, 0, 1],
+                  }),
+                },
+              ],
+              opacity: progress.interpolate({
+                inputRange: [-1, 0, 0.5, 1],
+                outputRange: [0, 0, 0, 1],
+              }),
+            },
+          ]}
+        >
+          <View style={styles.css.chatEmojiReactionComponent}>
+            <EmojiButton emoji="❤️" contactId={contactId} />
+            <EmojiButton emoji="😮" contactId={contactId} />
+            <EmojiButton emoji="😂" contactId={contactId} />
+            <EmojiButton emoji="😢" contactId={contactId} />
+            <EmojiButton emoji="😡" contactId={contactId} />
+            <EmojiButton emoji="👍" contactId={contactId} />
+          </View>
+        </Animated.View>
     ),
     [reacting]
   );

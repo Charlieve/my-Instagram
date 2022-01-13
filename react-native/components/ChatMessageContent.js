@@ -26,6 +26,7 @@ import { selectMessageByIndexAndMessageIndex } from "../features/message/message
 import UserIconImage from "./UserIconImage";
 import ChatMessageGradient from "./ChatMessageGradient";
 import ChatMessageClock from "./ChatMessageClock";
+import ChatMessageQuickReply from "./ChatMessageQuickReply";
 
 if (
   Platform.OS === "android" &&
@@ -71,7 +72,9 @@ const ChatBubble = ({
   index,
   section,
   setReacting,
+  setReplying,
   setHighlight,
+  setScrollable,
 }) => {
   const styles = createStyles();
   const userId = useSelector(selectUserId);
@@ -181,98 +184,215 @@ const ChatBubble = ({
               },
             ]}
           >
-            <Pressable
+            {/* <Pressable
               style={{ width: "100%", height: "100%" }}
               onPress={() => closeExpended()}
-            />
+            /> */}
           </Animated.View>
-          <Pressable
-            onPressIn={() => {
-              Animated.timing(pressProgress, {
-                toValue: 1,
-                useNativeDriver: false,
-              }).start();
-            }}
-            onPressOut={() => {
-              Animated.spring(pressProgress, {
-                toValue: 0,
-                friction: 4,
-                useNativeDriver: false,
-              }).start();
-            }}
-            onLongPress={({ nativeEvent }) => {
-              Animated.spring(pressProgress, {
-                toValue: 0,
-                friction: 4,
-                useNativeDriver: false,
-              }).start();
-              expend(nativeEvent);
-            }}
+          <QuickReplyPanHandler
+            message={message}
+            myMessage={myMessage}
+            setScrollable={setScrollable}
+            setReplying={setReplying}
           >
-            <Animated.View
-              style={[
-                {
-                  transform: [
-                    {
-                      scale: pressProgress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [1, 0.85],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+            <Pressable
+              onPressIn={() => {
+                setScrollable(false);
+                Animated.timing(pressProgress, {
+                  toValue: 1,
+                  useNativeDriver: false,
+                }).start();
+              }}
+              onPressOut={() => {
+                Animated.spring(pressProgress, {
+                  toValue: 0,
+                  friction: 4,
+                  useNativeDriver: false,
+                }).start();
+              }}
+              onLongPress={({ nativeEvent }) => {
+                Animated.spring(pressProgress, {
+                  toValue: 0,
+                  friction: 4,
+                  useNativeDriver: false,
+                }).start();
+                expend(nativeEvent);
+              }}
             >
-              {haveReplying && (
-                <ReplyingBubble
-                  myMessage={myMessage}
-                  contactIndex={contactIndex}
-                  replyingIndex={message.replyToMessageIndex}
-                />
-              )}
-              <View
+              <Animated.View
                 style={[
-                  styles.css.chatBubble,
-                  myMessage
-                    ? styles.css.chatBubbleSelf
-                    : styles.css.chatBubbleOther,
-                  isFirst && {
-                    borderTopRightRadius: 20,
-                    borderTopLeftRadius: 20,
+                  {
+                    transform: [
+                      {
+                        scale: pressProgress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 0.85],
+                        }),
+                      },
+                    ],
                   },
-                  isLast && {
-                    borderBottomRightRadius: 20,
-                    borderBottomLeftRadius: 20,
-                  },
-                  message.status === "pending" && { opacity: 0.7 },
                 ]}
               >
-                {/* <ChatMessageGradient /> */}
-                {useMemo(
-                  () => (
-                    <ChatBubbleContent
-                      message={message}
-                      myMessage={myMessage}
-                    />
-                  ),
-                  [message]
+                {haveReplying && (
+                  <ReplyingBubble
+                    myMessage={myMessage}
+                    contactIndex={contactIndex}
+                    replyingIndex={message.replyToMessageIndex}
+                  />
                 )}
-                {useMemo(
-                  () => (
-                    <ChatBubbleReaction
-                      reactions={message.reactions}
-                      myMessage={myMessage}
-                    />
-                  ),
-                  [message.reactions]
-                )}
-              </View>
-            </Animated.View>
-          </Pressable>
+                <View
+                  style={[
+                    styles.css.chatBubble,
+                    myMessage
+                      ? styles.css.chatBubbleSelf
+                      : styles.css.chatBubbleOther,
+                    isFirst && {
+                      borderTopRightRadius: 20,
+                      borderTopLeftRadius: 20,
+                    },
+                    isLast && {
+                      borderBottomRightRadius: 20,
+                      borderBottomLeftRadius: 20,
+                    },
+                    message.status === "pending" && { opacity: 0.7 },
+                  ]}
+                >
+                  {/* <ChatMessageGradient /> */}
+                  {useMemo(
+                    () => (
+                      <ChatBubbleContent
+                        message={message}
+                        myMessage={myMessage}
+                      />
+                    ),
+                    [message]
+                  )}
+                  {useMemo(
+                    () => (
+                      <ChatBubbleReaction
+                        reactions={message.reactions}
+                        myMessage={myMessage}
+                      />
+                    ),
+                    [message.reactions]
+                  )}
+                </View>
+              </Animated.View>
+            </Pressable>
+          </QuickReplyPanHandler>
         </View>
       </View>
       <ChatMessageClock myMessage={myMessage} timestamp={message.date} />
     </Animated.View>
+  );
+};
+
+const QuickReplyPanHandler = (props) => {
+  const { message, myMessage, setScrollable, setReplying } = props;
+  const pan = useRef(new Animated.ValueXY()).current;
+  const [progress, setProgress] = useState(0);
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponderCapture: (event, gestureState) =>
+        myMessage ? gestureState.dx < -5 : gestureState.dx > 5,
+        
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: () => {
+        setScrollable(false);
+      },
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+        listener: (event, gestureState) =>
+          setProgress(
+            Math.min(100, gestureState.dx * (100 / 70) * (myMessage ? -1 : 1))
+          ),
+        useNativeDriver: false,
+      }),
+
+      onPanResponderTerminate: (event, gestureState) => {
+        Animated.spring(
+          pan, // Auto-multiplexed
+          { toValue: { x: 0, y: 0 }, useNativeDriver: false } // Back to zero
+        ).start();
+        if (
+          Math.min(100, gestureState.dx * (100 / 70) * (myMessage ? -1 : 1)) ===
+          100
+        ) {
+          setReplying({ display: true, replyingMessage: message });
+        }
+        setProgress(0);
+        setScrollable(true);
+      },
+      onPanResponderRelease: (event, gestureState) => {
+        Animated.spring(
+          pan, // Auto-multiplexed
+          { toValue: { x: 0, y: 0 }, useNativeDriver: false } // Back to zero
+        ).start();
+        if (
+          Math.min(100, gestureState.dx * (100 / 70) * (myMessage ? -1 : 1)) ===
+          100
+        ) {
+          setReplying({ display: true, replyingMessage: message });
+        }
+        setProgress(0);
+        setScrollable(true);
+      },
+    })
+  ).current;
+  return (
+    <View>
+      <Animated.View
+        style={{
+          transform: [
+            {
+              translateX: pan.x.interpolate(
+                myMessage
+                  ? {
+                      inputRange: [-2, 0, 2],
+                      outputRange: [-1, 0, 0],
+                    }
+                  : {
+                      inputRange: [-2, 0, 2],
+                      outputRange: [0, 0, 1],
+                    }
+              ),
+            },
+          ],
+        }}
+        {...panResponder.panHandlers}
+      >
+        {props.children}
+      </Animated.View>
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            bottom: 0,
+            top: 0,
+            justifyContent: "center",
+          },
+          myMessage ? { right: -40 } : { left: -40 },
+          {
+            transform: [
+              {
+                translateX: pan.x.interpolate(
+                  myMessage
+                    ? {
+                        inputRange: [-81, -80, -2, 0, 2],
+                        outputRange: [-40, -40, -1, 0, 0],
+                      }
+                    : {
+                        inputRange: [-2, 0, 2, 80, 81],
+                        outputRange: [0, 0, 1, 40, 40],
+                      }
+                ),
+              },
+            ],
+          },
+        ]}
+      >
+        <ChatMessageQuickReply size={32} progress={progress} />
+      </Animated.View>
+    </View>
   );
 };
 
@@ -377,8 +497,16 @@ const ChatBubbleReaction = ({ reactions, myMessage }) => {
 };
 
 const ChatBubbleView = () => {
-  const { contactIndex, item, index, section, setReacting, setHighlight } =
-    useContext(ChatContext);
+  const {
+    contactIndex,
+    item,
+    index,
+    section,
+    setReacting,
+    setReplying,
+    setHighlight,
+    setScrollable,
+  } = useContext(ChatContext);
 
   return useMemo(
     () => {
@@ -389,7 +517,9 @@ const ChatBubbleView = () => {
           index={index}
           section={section}
           setReacting={setReacting}
+          setReplying={setReplying}
           setHighlight={setHighlight}
+          setScrollable={setScrollable}
         />
       );
     },
@@ -404,6 +534,8 @@ const ChatBubbleProvider = ({
   index,
   section,
   setReacting,
+  setReplying,
+  setScrollable,
 }) => {
   const { setHighlight } = useContext(ChatCellContext);
   const context = {
@@ -412,7 +544,9 @@ const ChatBubbleProvider = ({
     index,
     section,
     setReacting,
+    setReplying,
     setHighlight,
+    setScrollable,
   };
   return (
     <Animated.View
@@ -421,8 +555,8 @@ const ChatBubbleProvider = ({
           transform: [
             {
               translateX: pan.x.interpolate({
-                inputRange: [-300,-80, 0, 1],
-                outputRange: [-120,-60, 0, 0],
+                inputRange: [-300, -80, 0, 1],
+                outputRange: [-120, -60, 0, 0],
               }),
             },
           ],
@@ -454,7 +588,7 @@ const sectioningByMessageDate = (messageData) => {
 
 const ChatMessageContent = ({ contactId }) => {
   const styles = createStyles();
-  const { messageData, contactIndex, setReacting, replying } =
+  const { messageData, contactIndex, setReacting, replying, setReplying } =
     useContext(ChatMessageContext);
 
   const [scrollable, setScrollable] = useState(true);
@@ -474,7 +608,11 @@ const ChatMessageContent = ({ contactId }) => {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (event, gestureState) => {
-        if (scrolling === false && gestureState.dx < -5) {
+        if (
+          scrollable === true &&
+          scrolling === false &&
+          gestureState.dx < -5
+        ) {
           return true;
         }
       },
@@ -511,6 +649,8 @@ const ChatMessageContent = ({ contactId }) => {
               index={index}
               section={section}
               setReacting={setReacting}
+              setReplying={setReplying}
+              setScrollable={setScrollable}
             />
           )}
           keyExtractor={(item, index) => "message " + index}
@@ -526,6 +666,7 @@ const ChatMessageContent = ({ contactId }) => {
           onScrollBeginDrag={() => setSrcolling(true)}
           onScrollEndDrag={() => setSrcolling(false)}
           scrollEnabled={scrollable}
+          canCancelContentTouches={scrollable}
         />
       </View>
     ),

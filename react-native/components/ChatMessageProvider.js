@@ -13,6 +13,7 @@ import ChatMessageContent from "./ChatMessageContent";
 import ChatMessageInput from "./ChatMessageInput";
 import ChatMessageReactionBottom from "./ChatMessageReactionBottom";
 import ChatMessageReactionEmoji from "./ChatMessageReactionEmoji";
+import ChatMessageReactionOverlay from "./ChatMessageReactionOverlay"
 
 const ChatMessageProviderComponent = (props) => {
   const { contactId } = props;
@@ -61,6 +62,7 @@ const ChatMessageProvider = ({ contactId }) => {
       >
         <View style={{ flex: 1, justifyContent: "space-around" }}>
           <ChatMessageContent contactId={contactId} />
+          <ChatMessageReactionOverlay />
           <ChatMessageInput contactId={contactId} />
           <ChatMessageReactionBottom contactId={contactId} />
           <ChatMessageReactionEmoji contactId={contactId} />

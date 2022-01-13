@@ -25,48 +25,52 @@ const ChatMessageReactionBottom = ({ contactId }) => {
     }
   }, [reacting.display]);
 
-  const replyToMessage = () =>{
-    setReplying({display:true,replyingMessage:reacting.message})
+  const replyToMessage = () => {
+    setReplying({ display: true, replyingMessage: reacting.message });
     reacting?.closeExpended();
-  }
+  };
 
-  return (
-    <Animated.View
-      style={[
-        styles.css.messageReactionBottomComponent,
-        {
-          transform: [
-            {
-              translateY: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [70, 0],
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-        <Pressable style={styles.css.messageReactionBottomButton} onPress={()=>replyToMessage()}>
-          <Text style={[styles.css.superBoldFont, { fontSize: 16 }]}>
-            Reply
-          </Text>
-        </Pressable>
-        <Pressable style={styles.css.messageReactionBottomButton}>
-          <Text
-            style={[
-              styles.css.superBoldFont,
-              { fontSize: 16, color: styles.colors.warning },
-            ]}
+  return (<Animated.View
+        style={[
+          styles.css.messageReactionBottomComponent,
+          {
+            transform: [
+              {
+                translateY: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [70, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+          <Pressable
+            style={styles.css.messageReactionBottomButton}
+            onPress={() => replyToMessage()}
           >
-            Report
-          </Text>
-        </Pressable>
-        <Pressable style={styles.css.messageReactionBottomButton}>
-          <Text style={[styles.css.superBoldFont, { fontSize: 16 }]}>More</Text>
-        </Pressable>
-      </View>
-    </Animated.View>
+            <Text style={[styles.css.superBoldFont, { fontSize: 16 }]}>
+              Reply
+            </Text>
+          </Pressable>
+          <Pressable style={styles.css.messageReactionBottomButton}>
+            <Text
+              style={[
+                styles.css.superBoldFont,
+                { fontSize: 16, color: styles.colors.warning },
+              ]}
+            >
+              Report
+            </Text>
+          </Pressable>
+          <Pressable style={styles.css.messageReactionBottomButton}>
+            <Text style={[styles.css.superBoldFont, { fontSize: 16 }]}>
+              More
+            </Text>
+          </Pressable>
+        </View>
+      </Animated.View>
   );
 };
 
