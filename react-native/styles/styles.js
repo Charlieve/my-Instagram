@@ -421,7 +421,6 @@ export default function createStyles() {
     chatMessageContainer: {
       paddingLeft: 12,
       paddingRight: 12,
-      flexDirection: "column-reverse",
       paddingTop: 60,
     },
     chatMessageSection: {

@@ -91,17 +91,18 @@ const ChatBubble = ({
   const haveReaction = Object.keys(message.reactions).length !== 0;
   const haveReplying = message.replyToMessageIndex;
 
-  const isFirst =
+  // remember data is reversed
+  const isLast =
     index === 0 ||
     !checkMessageinSameSection(message, section.data[index - 1]) ||
-    Object.keys(section.data[index - 1].reactions).length !== 0 ||
-    haveReplying;
+    section.data[index - 1].replyToMessageIndex ||
+    haveReaction;
 
-  const isLast =
+  const isFirst =
     index === totalQty - 1 ||
     !checkMessageinSameSection(message, section.data[index + 1]) ||
-    haveReaction ||
-    section.data[index + 1].replyToMessageIndex;
+    haveReplying ||
+    Object.keys(section.data[index + 1].reactions).length !== 0;
 
   const myMessage = message.userId === userId;
 
@@ -197,7 +198,6 @@ const ChatBubble = ({
           >
             <Pressable
               onPressIn={() => {
-                setScrollable(false);
                 Animated.timing(pressProgress, {
                   toValue: 1,
                   useNativeDriver: false,
@@ -295,7 +295,7 @@ const QuickReplyPanHandler = (props) => {
     PanResponder.create({
       onMoveShouldSetPanResponderCapture: (event, gestureState) =>
         myMessage ? gestureState.dx < -5 : gestureState.dx > 5,
-        
+
       onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => {
         setScrollable(false);
@@ -583,13 +583,22 @@ const sectioningByMessageDate = (messageData) => {
       result[result.length - 1].data.push(message);
     }
   }
-  return result;
+
+  // reverse
+  for (let section of result) {
+    section.data = section.data.reverse();
+  }
+
+  return result.reverse();
 };
 
 const ChatMessageContent = ({ contactId }) => {
   const styles = createStyles();
   const { messageData, contactIndex, setReacting, replying, setReplying } =
     useContext(ChatMessageContext);
+
+  const [showSections, setShowSections] = useState(1);
+  const everySectionsQty = 5;
 
   const [scrollable, setScrollable] = useState(true);
   const [scrolling, setSrcolling] = useState(false);
@@ -637,9 +646,12 @@ const ChatMessageContent = ({ contactId }) => {
 
   return useMemo(
     () => (
-      <View {...panResponder.panHandlers}>
+      <View {...panResponder.panHandlers} style={{ flex: 1 }}>
         <SectionList
-          sections={messageDataSection}
+          sections={messageDataSection.slice(
+            0,
+            showSections * everySectionsQty
+          )}
           CellRendererComponent={createChatCellComponent}
           renderItem={({ item, index, section }) => (
             <ChatBubbleProvider
@@ -654,7 +666,7 @@ const ChatMessageContent = ({ contactId }) => {
             />
           )}
           keyExtractor={(item, index) => "message " + index}
-          renderSectionHeader={({ section: { date } }) => (
+          renderSectionFooter={({ section: { date } }) => (
             <DateSectionTitle date={date} />
           )}
           contentContainerStyle={[
@@ -667,10 +679,18 @@ const ChatMessageContent = ({ contactId }) => {
           onScrollEndDrag={() => setSrcolling(false)}
           scrollEnabled={scrollable}
           canCancelContentTouches={scrollable}
+          onEndReached={() =>
+            setShowSections(
+              Math.min(
+                Math.ceil(messageDataSection.length / everySectionsQty),
+                showSections + 1
+              )
+            )
+          }
         />
       </View>
     ),
-    [messageDataSection, replying, scrollable]
+    [messageDataSection, replying, scrollable, showSections]
   );
 };
 
